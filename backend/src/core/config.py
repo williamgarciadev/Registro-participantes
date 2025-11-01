@@ -15,20 +15,20 @@ class Settings(BaseSettings):
     VERSION: str = "1.0.0"
 
     # Entorno
-    STAGE: str = os.getenv("STAGE", "dev")
+    STAGE: str = "dev"
 
     # Base de datos
-    DB_SECRET_ARN: str = os.getenv("DB_SECRET_ARN", "")
-    DATABASE_URL: str = os.getenv("DATABASE_URL", "")
+    DB_SECRET_ARN: str = ""
+    DATABASE_URL: str = ""
 
     # AWS
-    AWS_REGION: str = os.getenv("AWS_REGION", "us-east-1")
+    AWS_REGION: str = "us-east-1"
 
     # CORS
     CORS_ORIGINS: List[str] = ["*"]  # En producción, especificar dominios permitidos
 
     # Logging
-    LOG_LEVEL: str = os.getenv("LOG_LEVEL", "INFO")
+    LOG_LEVEL: str = "INFO"
 
     class Config:
         case_sensitive = True

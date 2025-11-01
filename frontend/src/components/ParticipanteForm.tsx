@@ -1,4 +1,5 @@
-import { useForm } from 'react-hook-form'
+import { useEffect } from 'react'
+import { useForm, Controller } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import type { ParticipanteCreate, ParticipanteUpdate } from '@/types/participante'
@@ -26,11 +27,32 @@ export default function ParticipanteForm({
   const {
     register,
     handleSubmit,
+    reset,
+    control,
+    watch,
     formState: { errors },
   } = useForm<ParticipanteFormData>({
     resolver: zodResolver(participanteSchema),
-    defaultValues: initialData,
+    defaultValues: {
+      nombre: initialData?.nombre || '',
+      apellido: initialData?.apellido || '',
+      email: initialData?.email || '',
+      telefono: initialData?.telefono || '',
+    },
+    mode: 'onBlur',
   })
+
+  // Actualizar el formulario cuando initialData cambia
+  useEffect(() => {
+    if (initialData) {
+      reset({
+        nombre: initialData.nombre || '',
+        apellido: initialData.apellido || '',
+        email: initialData.email || '',
+        telefono: initialData.telefono || '',
+      })
+    }
+  }, [initialData, reset])
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
@@ -46,6 +68,7 @@ export default function ParticipanteForm({
             id="nombre"
             className="input"
             placeholder="Juan"
+            autoComplete="given-name"
           />
           {errors.nombre && (
             <p className="mt-1 text-sm text-red-600">{errors.nombre.message}</p>
@@ -63,6 +86,7 @@ export default function ParticipanteForm({
             id="apellido"
             className="input"
             placeholder="Pérez"
+            autoComplete="family-name"
           />
           {errors.apellido && (
             <p className="mt-1 text-sm text-red-600">{errors.apellido.message}</p>
@@ -80,6 +104,7 @@ export default function ParticipanteForm({
             id="email"
             className="input"
             placeholder="juan.perez@example.com"
+            autoComplete="email"
           />
           {errors.email && (
             <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -97,6 +122,7 @@ export default function ParticipanteForm({
             id="telefono"
             className="input"
             placeholder="+1 234 567 8900"
+            autoComplete="tel"
           />
           {errors.telefono && (
             <p className="mt-1 text-sm text-red-600">{errors.telefono.message}</p>

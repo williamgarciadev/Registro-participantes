@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import ParticipanteForm from '@/components/ParticipanteForm'
 import { participantesApi } from '@/services/participantes'
@@ -7,10 +7,12 @@ import type { ParticipanteCreate } from '@/types/participante'
 
 export default function NuevoParticipantePage() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
   const createMutation = useMutation({
     mutationFn: participantesApi.create,
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['participantes'] })
       toast.success('Participante creado correctamente')
       navigate('/participantes')
     },

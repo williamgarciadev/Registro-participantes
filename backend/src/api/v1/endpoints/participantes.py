@@ -41,7 +41,7 @@ async def create_participante(
     - **apellido**: Apellido del participante
     - **email**: Email único del participante
     - **telefono**: Teléfono (opcional)
-    - **metadata**: Metadata adicional (opcional)
+    - **extra_data**: Datos adicionales en formato JSON (opcional)
     """
     logger.info(f"Creando participante: {participante.email}")
     return await ParticipanteService.create_participante(db, participante)

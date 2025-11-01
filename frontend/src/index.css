@@ -7,8 +7,8 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  color-scheme: light;
+  color: #1f2937;
   background-color: #f9fafb;
 
   font-synthesis: none;
@@ -44,7 +44,19 @@ body {
   }
 
   .input {
-    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent;
+    @apply w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-gray-900 placeholder-gray-400;
+  }
+
+  .input::placeholder {
+    color: rgb(156 163 175 / 1);
+  }
+
+  select {
+    @apply text-gray-900;
+  }
+
+  option {
+    @apply text-gray-900;
   }
 
   .card {

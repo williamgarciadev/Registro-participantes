@@ -9,6 +9,7 @@ import type { EstadoParticipante } from '@/types/participante'
 export default function ParticipantesPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [estadoFilter, setEstadoFilter] = useState<EstadoParticipante | ''>('')
+  const [deleteModal, setDeleteModal] = useState<{ id: string; nombre: string } | null>(null)
   const queryClient = useQueryClient()
 
   // Query para obtener participantes
@@ -40,9 +41,18 @@ export default function ParticipantesPage() {
   })
 
   const handleDelete = (id: string, nombre: string) => {
-    if (window.confirm(`¿Estás seguro de eliminar a ${nombre}?`)) {
-      deleteMutation.mutate(id)
+    setDeleteModal({ id, nombre })
+  }
+
+  const confirmDelete = () => {
+    if (deleteModal) {
+      deleteMutation.mutate(deleteModal.id)
+      setDeleteModal(null)
     }
+  }
+
+  const cancelDelete = () => {
+    setDeleteModal(null)
   }
 
   const handleSearch = (e: React.FormEvent) => {
@@ -205,6 +215,62 @@ export default function ParticipantesPage() {
           </div>
         )}
       </div>
+
+      {/* Modal de confirmación de eliminación */}
+      {deleteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-lg shadow-2xl max-w-sm w-full transform transition-all animate-in zoom-in duration-200">
+            <div className="p-8">
+              {/* Icono */}
+              <div className="flex items-center justify-center w-14 h-14 mx-auto bg-red-100 rounded-full">
+                <Trash2 className="h-7 w-7 text-red-600" />
+              </div>
+
+              {/* Título */}
+              <h3 className="mt-5 text-xl font-bold text-gray-900 text-center">
+                Eliminar participante
+              </h3>
+
+              {/* Mensaje */}
+              <p className="mt-3 text-sm text-gray-600 text-center leading-relaxed">
+                ¿Estás seguro de que deseas eliminar a{' '}
+                <span className="font-semibold text-gray-900">{deleteModal.nombre}</span>?
+              </p>
+              <p className="mt-2 text-xs text-gray-500 text-center">
+                El participante será marcado como inactivo y podrá ser recuperado después.
+              </p>
+
+              {/* Botones */}
+              <div className="mt-7 flex gap-3">
+                <button
+                  onClick={cancelDelete}
+                  disabled={deleteMutation.isPending}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors duration-200"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={deleteMutation.isPending}
+                  className="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                >
+                  {deleteMutation.isPending ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      Eliminando...
+                    </>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4" />
+                      Eliminar
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

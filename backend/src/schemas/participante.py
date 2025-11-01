@@ -15,7 +15,7 @@ class ParticipanteBase(BaseModel):
     apellido: str = Field(..., min_length=1, max_length=100, description="Apellido del participante")
     email: EmailStr = Field(..., description="Email del participante")
     telefono: Optional[str] = Field(None, max_length=20, description="Teléfono del participante")
-    metadata: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Metadata adicional")
+    extra_data: Optional[Dict[str, Any]] = Field(default_factory=dict, description="Datos adicionales (JSON)")
 
 
 class ParticipanteCreate(ParticipanteBase):
@@ -30,7 +30,7 @@ class ParticipanteUpdate(BaseModel):
     email: Optional[EmailStr] = None
     telefono: Optional[str] = Field(None, max_length=20)
     estado: Optional[EstadoParticipante] = None
-    metadata: Optional[Dict[str, Any]] = None
+    extra_data: Optional[Dict[str, Any]] = None
 
 
 class ParticipanteResponse(ParticipanteBase):

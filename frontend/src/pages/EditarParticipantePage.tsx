@@ -1,5 +1,6 @@
+import { useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { useQuery, useMutation } from '@tanstack/react-query'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import ParticipanteForm from '@/components/ParticipanteForm'
 import { participantesApi } from '@/services/participantes'
@@ -8,16 +9,25 @@ import type { ParticipanteUpdate } from '@/types/participante'
 export default function EditarParticipantePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  const { data: participante, isLoading } = useQuery({
+  const { data: participante, isLoading, refetch } = useQuery({
     queryKey: ['participante', id],
     queryFn: () => participantesApi.getById(id!),
     enabled: !!id,
   })
 
+  // Re-ejecutar query cuando el ID cambia
+  useEffect(() => {
+    if (id) {
+      refetch()
+    }
+  }, [id, refetch])
+
   const updateMutation = useMutation({
     mutationFn: (data: ParticipanteUpdate) => participantesApi.update(id!, data),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['participantes'] })
       toast.success('Participante actualizado correctamente')
       navigate('/participantes')
     },

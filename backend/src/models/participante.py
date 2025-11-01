@@ -34,8 +34,8 @@ class Participante(Base):
     email = Column(String(255), unique=True, nullable=False, index=True)
     telefono = Column(String(20), nullable=True)
     estado = Column(
-        SQLEnum(EstadoParticipante),
-        default=EstadoParticipante.ACTIVO,
+        String(20),
+        default=EstadoParticipante.ACTIVO.value,
         nullable=False,
         index=True
     )
@@ -45,7 +45,7 @@ class Participante(Base):
         nullable=False,
         index=True
     )
-    metadata = Column(JSON, default=dict, nullable=True)
+    extra_data = Column(JSON, default=dict, nullable=True)
 
     def __repr__(self):
         return f"<Participante {self.nombre} {self.apellido} ({self.email})>"

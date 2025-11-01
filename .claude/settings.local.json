@@ -6,7 +6,11 @@
       "Bash(git push:*)",
       "Bash(aws cloudformation describe-stacks:*)",
       "Bash(aws cloudformation delete-stack:*)",
-      "Bash(sam delete:*)"
+      "Bash(sam delete:*)",
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(curl:*)",
+      "Bash(python -m json.tool:*)"
     ],
     "deny": [],
     "ask": []
