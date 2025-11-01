@@ -288,4 +288,5 @@ Presiona **ENTER** y deja que el deploy continúe.
 Si necesitas más ayuda:
 - Para comandos: `AWS_QUICK_COMMANDS.md`
 - Para troubleshooting: `RESOLVIENDO_DEPLOY.md`
+- Si error de Aurora: `SOLUCION_AURORA_VERSION.md`
 - Para aprender: `docs/AWS_SETUP_STEP_BY_STEP.md`
