@@ -148,7 +148,11 @@ Default output format [None]: json
 ```bash
 aws sts get-caller-identity
 ```
-
+{
+    "UserId": "AIDAVQ6UGHLSNMDQMSPNR",
+    "Account": "380012739300",
+    "Arn": "arn:aws:iam::380012739300:user/registro-participantes-dev"
+}
 Deberías ver tu ID de AWS Account y ARN del usuario.
 
 ### 2.3 Instalar AWS SAM CLI
