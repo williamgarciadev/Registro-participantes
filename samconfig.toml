@@ -7,7 +7,7 @@ s3_prefix = "registro-participantes-dev"
 confirm_changeset = true
 capabilities = "CAPABILITY_IAM"
 disable_rollback = true
-parameter_overrides = "Stage=\"dev\" DBMasterUsername=\"postgres\" DBMasterPassword=\"ChangeMe123!\""
+parameter_overrides = "Stage=\"dev\" DBMasterUsername=\"postgres\" DBMasterPassword=\"Cucuta.2025$\""
 image_repositories = []
 
 [default.global.parameters]

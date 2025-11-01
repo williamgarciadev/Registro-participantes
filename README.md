@@ -25,30 +25,80 @@ Sistema de registro de participantes construido con arquitectura serverless en A
 ## 📁 Estructura del Proyecto
 
 ```
-.
-├── backend/                 # Código del backend FastAPI
+Registro-participantes/
+│
+├── 📋 DOCUMENTACION/
+│   ├── COMIENZA_AQUI.md              ← PUNTO DE ENTRADA
+│   ├── INDEX.md                      ← Índice completo
+│   ├── ESTATUS_ACTUAL.md
+│   ├── RESUMEN_DOCUMENTACION.md
+│   └── SETUP_AYUDA.txt
+│
+├── 🚀 deploy-docs/
+│   ├── AHORA_EJECUTA.md              ← Acción inmediata
+│   ├── PASOS_AHORA.md
+│   ├── AWS_DEPLOYMENT_OVERVIEW.md    ← Arquitectura
+│   ├── AWS_DEPLOYMENT_CHECKLIST.md
+│   └── AWS_QUICK_COMMANDS.md         ← Referencia rápida
+│
+├── 🆘 troubleshooting/
+│   ├── SOLUCION_AURORA_VERSION.md
+│   ├── SOLUCION_PARAMETROS_BD.md
+│   ├── ERROR_ARREGLADO.md
+│   ├── URGENTE_ESTADO_DELETE.md
+│   ├── TU_SITUACION_ACTUAL.md
+│   └── RESOLVIENDO_DEPLOY.md
+│
+├── 📚 docs/
+│   ├── AWS_SETUP_STEP_BY_STEP.md    ← 10 pasos detallados
+│   ├── DEVELOPMENT.md                ← Setup local
+│   ├── API.md                        ← Endpoints
+│   └── DEPLOYMENT.md                 ← Despliegues futuros
+│
+├── 🐍 backend/
 │   ├── src/
-│   │   ├── api/            # Endpoints de la API
-│   │   ├── models/         # Modelos de datos
-│   │   ├── services/       # Lógica de negocio
-│   │   ├── database/       # Configuración de base de datos
-│   │   └── utils/          # Utilidades
-│   ├── tests/              # Tests unitarios
-│   ├── requirements.txt    # Dependencias de Python
-│   └── Dockerfile          # Dockerfile para desarrollo local
-├── frontend/               # Código del frontend React
+│   │   ├── api/                      ← Endpoints de la API
+│   │   ├── models/                   ← Modelos de datos
+│   │   ├── services/                 ← Lógica de negocio
+│   │   ├── database/                 ← Configuración BD
+│   │   ├── core/
+│   │   └── main.py
+│   ├── tests/
+│   ├── requirements.txt
+│   └── Dockerfile
+│
+├── ⚛️ frontend/
 │   ├── src/
-│   │   ├── components/    # Componentes React
-│   │   ├── pages/         # Páginas de la aplicación
-│   │   ├── services/      # Servicios API
-│   │   └── utils/         # Utilidades
-│   ├── public/            # Archivos estáticos
-│   └── package.json       # Dependencias de Node.js
-├── infrastructure/        # Infraestructura como código
-│   ├── template.yaml     # AWS SAM template
-│   └── samconfig.toml    # Configuración de SAM
-└── docs/                 # Documentación adicional
+│   │   ├── components/               ← Componentes React
+│   │   ├── pages/                    ← Páginas
+│   │   ├── services/                 ← Servicios API
+│   │   ├── types/                    ← TypeScript types
+│   │   └── main.tsx
+│   ├── public/
+│   ├── package.json
+│   └── vite.config.ts
+│
+├── 🛠️ scripts/
+│   ├── setup-aws.sh                  ← Deploy automático (Linux/macOS)
+│   ├── setup-aws.ps1                 ← Deploy automático (Windows)
+│   └── init-database.sql             ← Crear tablas
+│
+├── 🏗️ template.yaml                  ← AWS SAM CloudFormation
+├── 📄 CLAUDE.md                      ← Instrucciones para Claude
+├── 📄 README.md                      ← Este archivo
+├── 📄 Makefile                       ← Comandos de desarrollo
+└── 📄 .gitignore
 ```
+
+### 📖 Explicación de Carpetas
+
+- **DOCUMENTACION/** → Documentos para usuarios
+- **deploy-docs/** → Guías de despliegue en AWS
+- **troubleshooting/** → Soluciones de errores
+- **docs/** → Documentación técnica (desarrollo)
+- **backend/** → Código Python FastAPI
+- **frontend/** → Código React TypeScript
+- **scripts/** → Scripts de automatización
 
 ## 🏗️ Arquitectura
 
@@ -142,17 +192,42 @@ aws s3 sync dist/ s3://bucket-name/ --delete
 aws cloudfront create-invalidation --distribution-id ID --paths "/*"
 ```
 
-## 📚 Documentación de Despliegue
+## 📚 Documentación
+
+### 🚀 Empezar Aquí
 
 | Documento | Descripción |
 |-----------|-------------|
-| **[AWS_SETUP_STEP_BY_STEP.md](./docs/AWS_SETUP_STEP_BY_STEP.md)** | ⭐ Guía completa paso a paso (COMIENZA AQUÍ) |
-| **[AWS_DEPLOYMENT_CHECKLIST.md](./AWS_DEPLOYMENT_CHECKLIST.md)** | Checklist interactivo para seguimiento |
-| **[AWS_DEPLOYMENT_OVERVIEW.md](./AWS_DEPLOYMENT_OVERVIEW.md)** | Visión general y arquitectura |
-| **[AWS_QUICK_COMMANDS.md](./AWS_QUICK_COMMANDS.md)** | Comandos rápidos y útiles |
-| **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** | Despliegues posteriores |
-| **[docs/API.md](./docs/API.md)** | Documentación de API endpoints |
-| **[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)** | Desarrollo local |
+| **[CLAUDE.md](./CLAUDE.md)** | ⭐ Instrucciones para Claude Code (Lee primero) |
+| **[DOCUMENTACION/COMIENZA_AQUI.md](./DOCUMENTACION/COMIENZA_AQUI.md)** | 🚀 Guía de inicio - elige opción A o B |
+| **[DOCUMENTACION/INDEX.md](./DOCUMENTACION/INDEX.md)** | 📑 Índice completo de toda la documentación |
+
+### 🚀 Despliegue en AWS
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[deploy-docs/AHORA_EJECUTA.md](./deploy-docs/AHORA_EJECUTA.md)** | ⚡ Acción inmediata (sam deploy) |
+| **[deploy-docs/AWS_DEPLOYMENT_OVERVIEW.md](./deploy-docs/AWS_DEPLOYMENT_OVERVIEW.md)** | 🏗️ Arquitectura y componentes |
+| **[deploy-docs/AWS_DEPLOYMENT_CHECKLIST.md](./deploy-docs/AWS_DEPLOYMENT_CHECKLIST.md)** | ✅ Checklist interactivo |
+| **[deploy-docs/AWS_QUICK_COMMANDS.md](./deploy-docs/AWS_QUICK_COMMANDS.md)** | ⚡ Comandos copy-paste |
+| **[docs/AWS_SETUP_STEP_BY_STEP.md](./docs/AWS_SETUP_STEP_BY_STEP.md)** | 📖 10 pasos detallados |
+
+### 🆘 Solución de Errores
+
+| Error | Solución |
+|-------|----------|
+| **Aurora version 15.4 no encontrada** | [troubleshooting/SOLUCION_AURORA_VERSION.md](./troubleshooting/SOLUCION_AURORA_VERSION.md) |
+| **Parámetros BD faltantes** | [troubleshooting/SOLUCION_PARAMETROS_BD.md](./troubleshooting/SOLUCION_PARAMETROS_BD.md) |
+| **Stack en DELETE_IN_PROGRESS** | [troubleshooting/URGENTE_ESTADO_DELETE.md](./troubleshooting/URGENTE_ESTADO_DELETE.md) |
+| **Otras soluciones** | [troubleshooting/](./troubleshooting/) |
+
+### 💻 Desarrollo
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)** | 💻 Setup local (backend + frontend) |
+| **[docs/API.md](./docs/API.md)** | 📡 Endpoints de la API con ejemplos |
+| **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** | 🚀 Despliegues posteriores e integración CI/CD |
 
 ## 📊 Modelo de Datos
 
