@@ -37,6 +37,27 @@ Parameters:
     MinLength: 8
 
 Resources:
+  # CloudWatch Logs Role para API Gateway
+  ApiGatewayCloudWatchLogsRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${AWS::StackName}-apigw-logs-role
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: apigateway.amazonaws.com
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/CloudWatchLogsFullAccess
+
+  # API Gateway Account Settings
+  ApiGatewayAccount:
+    Type: AWS::ApiGateway::Account
+    Properties:
+      CloudWatchRoleArn: !GetAtt ApiGatewayCloudWatchLogsRole.Arn
+
   # VPC para Aurora Serverless
   VPC:
     Type: AWS::EC2::VPC
@@ -227,6 +248,7 @@ Resources:
   # API Gateway
   ApiGateway:
     Type: AWS::Serverless::Api
+    DependsOn: ApiGatewayAccount
     Properties:
       Name: !Sub ${AWS::StackName}-api
       StageName: !Ref Stage

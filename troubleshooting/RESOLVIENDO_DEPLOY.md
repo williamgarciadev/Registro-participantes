@@ -1,5 +1,19 @@
 # 🔧 Resolviendo el Despliegue - Estás Atascado en SAM Deploy
 
+## 🔴 ¿Ves Este Error?
+
+```
+CREATE_FAILED - AWS::ApiGateway::Stage
+
+CloudWatch Logs role ARN must be set in account settings to enable logging
+```
+
+**→ Ve a:** `troubleshooting/SOLUCION_CLOUDWATCH_LOGS.md`
+
+---
+
+## ⏳ ¿Estás Esperando en el Prompt?
+
 Veo que estás en este punto:
 
 ```

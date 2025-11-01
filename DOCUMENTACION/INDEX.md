@@ -24,6 +24,7 @@
 |-----------|-----------|--------|-----------|
 | **[COMIENZA_AQUI.md](./COMIENZA_AQUI.md)** | Punto de entrada | 5 min | Todos |
 | **[RESOLVIENDO_DEPLOY.md](./RESOLVIENDO_DEPLOY.md)** | Atascado en sam deploy | 5 min | Stuck users |
+| **[troubleshooting/SOLUCION_CLOUDWATCH_LOGS.md](../troubleshooting/SOLUCION_CLOUDWATCH_LOGS.md)** | Error API Gateway CloudWatch Logs | 5 min | Error específico |
 | **[SOLUCION_AURORA_VERSION.md](./SOLUCION_AURORA_VERSION.md)** | Error versión Aurora PostgreSQL | 5 min | Error específico |
 | **[AWS_DEPLOYMENT_OVERVIEW.md](./AWS_DEPLOYMENT_OVERVIEW.md)** | Arquitectura y componentes | 20 min | Aprendices |
 | **[docs/AWS_SETUP_STEP_BY_STEP.md](./docs/AWS_SETUP_STEP_BY_STEP.md)** | 10 pasos detallados | 2 horas | Aprendices |
