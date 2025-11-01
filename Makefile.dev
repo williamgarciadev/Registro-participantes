@@ -1,0 +1,133 @@
+.PHONY: help docker-build docker-up docker-down docker-logs docker-bash docker-ps restart clean
+
+# Variables
+PROJECT_NAME = registro-participantes
+COMPOSE_FILE = docker-compose.dev.yml
+DOCKER_COMPOSE = docker-compose -f $(COMPOSE_FILE) -p $(PROJECT_NAME)
+
+help:
+	@echo "================================================"
+	@echo "Registro de Participantes - Desarrollo Local"
+	@echo "================================================"
+	@echo ""
+	@echo "Comandos disponibles:"
+	@echo ""
+	@echo "  make docker-build      - Construir imagenes Docker"
+	@echo "  make docker-up         - Iniciar contenedores"
+	@echo "  make docker-down       - Detener contenedores"
+	@echo "  make docker-ps         - Ver estado de contenedores"
+	@echo "  make docker-logs       - Ver logs en tiempo real"
+	@echo "  make docker-logs-backend - Ver logs del backend"
+	@echo "  make docker-logs-db    - Ver logs de la BD"
+	@echo "  make docker-bash-backend - Acceder a bash del backend"
+	@echo "  make docker-bash-db    - Acceder a psql de la BD"
+	@echo "  make restart           - Reiniciar contenedores"
+	@echo "  make clean             - Detener y limpiar todo"
+	@echo "  make test-api          - Probar endpoints de la API"
+	@echo ""
+	@echo "URLs disponibles:"
+	@echo "  API Backend:     http://localhost:8000"
+	@echo "  API Docs:        http://localhost:8000/docs"
+	@echo "  Frontend:        http://localhost:5173 o http://localhost:3000"
+	@echo "  pgAdmin:         http://localhost:5050"
+	@echo ""
+
+# Construccion y arranque
+docker-build:
+	@echo "Construyendo imagenes Docker..."
+	$(DOCKER_COMPOSE) build
+
+docker-up:
+	@echo "Iniciando contenedores..."
+	$(DOCKER_COMPOSE) up -d
+	@echo ""
+	@echo "✅ Contenedores iniciados!"
+	@echo ""
+	@echo "Accede a:"
+	@echo "  Backend API:     http://localhost:8000"
+	@echo "  Swagger Docs:    http://localhost:8000/docs"
+	@echo "  Frontend:        http://localhost:5173"
+	@echo "  pgAdmin:         http://localhost:5050 (admin@example.com / admin123)"
+	@echo ""
+
+docker-down:
+	@echo "Deteniendo contenedores..."
+	$(DOCKER_COMPOSE) down
+
+docker-ps:
+	@echo "Estado de contenedores:"
+	$(DOCKER_COMPOSE) ps
+
+# Logs
+docker-logs:
+	$(DOCKER_COMPOSE) logs -f
+
+docker-logs-backend:
+	$(DOCKER_COMPOSE) logs -f backend
+
+docker-logs-db:
+	$(DOCKER_COMPOSE) logs -f postgres
+
+docker-logs-frontend:
+	$(DOCKER_COMPOSE) logs -f frontend
+
+# Acceso a contenedores
+docker-bash-backend:
+	$(DOCKER_COMPOSE) exec backend bash
+
+docker-bash-db:
+	$(DOCKER_COMPOSE) exec postgres psql -U postgres -d participantes
+
+docker-bash-frontend:
+	$(DOCKER_COMPOSE) exec frontend bash
+
+# Utilidades
+restart: docker-down docker-up
+	@echo "✅ Contenedores reiniciados"
+
+clean:
+	@echo "Limpiando..."
+	$(DOCKER_COMPOSE) down -v
+	@echo "✅ Limpieza completada"
+
+# Tests
+test-api:
+	@echo "Probando API..."
+	@curl -s http://localhost:8000/health | python -m json.tool
+	@echo ""
+	@curl -s http://localhost:8000 | python -m json.tool
+	@echo ""
+
+# Desarrollo
+backend-shell:
+	$(DOCKER_COMPOSE) exec backend python
+
+db-shell:
+	$(DOCKER_COMPOSE) exec postgres psql -U postgres -d participantes
+
+# Migraciones (si utilizas Alembic)
+migrate-upgrade:
+	$(DOCKER_COMPOSE) exec backend alembic upgrade head
+
+migrate-downgrade:
+	$(DOCKER_COMPOSE) exec backend alembic downgrade -1
+
+# Rutas de instalacion
+install-backend-deps:
+	cd backend && pip install -r requirements.txt
+
+install-frontend-deps:
+	cd frontend && npm install
+
+# Build para produccion
+build-frontend:
+	cd frontend && npm run build
+
+# Verificar salud
+health-check:
+	@echo "Verificando salud del sistema..."
+	@echo "Backend API:"
+	@curl -s -o /dev/null -w "HTTP %{http_code}\n" http://localhost:8000/health
+	@echo "Intentando conectar a BD..."
+	@$(DOCKER_COMPOSE) exec postgres pg_isready -U postgres || echo "BD no disponible"
+	@echo "✅ Verificacion completada"
