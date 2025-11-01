@@ -98,8 +98,9 @@ Sistema de registro de participantes construido con arquitectura serverless en A
 
 ## 🚀 Inicio Rápido
 
-### Backend Local
+### 1. Desarrollo Local
 
+#### Backend
 ```bash
 cd backend
 python -m venv venv
@@ -108,27 +109,50 @@ pip install -r requirements.txt
 uvicorn src.main:app --reload
 ```
 
-### Frontend Local
-
+#### Frontend
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-### Deploy a AWS
+### 2. Despliegue en AWS
+
+**OPCIÓN A: Automatizado (Recomendado)**
 
 ```bash
-# Deploy completo (backend + infraestructura)
+# macOS/Linux
+bash scripts/setup-aws.sh
+
+# Windows PowerShell
+.\scripts\setup-aws.ps1
+```
+
+**OPCIÓN B: Manual**
+
+```bash
+# Backend
 sam build
 sam deploy --guided
 
-# Deploy del frontend
+# Frontend
 cd frontend
 npm run build
-aws s3 sync dist/ s3://your-bucket-name/
-aws cloudfront create-invalidation --distribution-id YOUR_DIST_ID --paths "/*"
+aws s3 sync dist/ s3://bucket-name/ --delete
+aws cloudfront create-invalidation --distribution-id ID --paths "/*"
 ```
+
+## 📚 Documentación de Despliegue
+
+| Documento | Descripción |
+|-----------|-------------|
+| **[AWS_SETUP_STEP_BY_STEP.md](./docs/AWS_SETUP_STEP_BY_STEP.md)** | ⭐ Guía completa paso a paso (COMIENZA AQUÍ) |
+| **[AWS_DEPLOYMENT_CHECKLIST.md](./AWS_DEPLOYMENT_CHECKLIST.md)** | Checklist interactivo para seguimiento |
+| **[AWS_DEPLOYMENT_OVERVIEW.md](./AWS_DEPLOYMENT_OVERVIEW.md)** | Visión general y arquitectura |
+| **[AWS_QUICK_COMMANDS.md](./AWS_QUICK_COMMANDS.md)** | Comandos rápidos y útiles |
+| **[docs/DEPLOYMENT.md](./docs/DEPLOYMENT.md)** | Despliegues posteriores |
+| **[docs/API.md](./docs/API.md)** | Documentación de API endpoints |
+| **[docs/DEVELOPMENT.md](./docs/DEVELOPMENT.md)** | Desarrollo local |
 
 ## 📊 Modelo de Datos
 
