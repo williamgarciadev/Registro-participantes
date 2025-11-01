@@ -1,41 +1,14 @@
 version = 0.1
 
-[default]
-[default.global.parameters]
-stack_name = "registro-participantes"
-
-[default.build.parameters]
-cached = true
-parallel = true
-
-[default.validate.parameters]
-lint = true
-
 [default.deploy.parameters]
-capabilities = "CAPABILITY_IAM"
+stack_name = "registro-participantes-dev"
+resolve_s3 = true
+s3_prefix = "registro-participantes-dev"
 confirm_changeset = true
-resolve_s3 = true
-region = "us-east-1"
-parameter_overrides = "Stage=dev DBMasterUsername=postgres DBMasterPassword=ChangeMe123!"
-
-[default.package.parameters]
-resolve_s3 = true
-
-[default.sync.parameters]
-watch = true
-
-[default.local_start_api.parameters]
-warm_containers = "EAGER"
-
-[default.local_start_lambda.parameters]
-warm_containers = "EAGER"
-
-# Configuración para producción
-[prod]
-[prod.deploy.parameters]
-stack_name = "registro-participantes-prod"
 capabilities = "CAPABILITY_IAM"
-confirm_changeset = true
-resolve_s3 = true
+disable_rollback = true
+parameter_overrides = "Stage=\"dev\" DBMasterUsername=\"postgres\" DBMasterPassword=\"ChangeMe123!\""
+image_repositories = []
+
+[default.global.parameters]
 region = "us-east-1"
-parameter_overrides = "Stage=prod"
