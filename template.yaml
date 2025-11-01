@@ -182,7 +182,6 @@ Resources:
     Properties:
       Engine: aurora-postgresql
       EngineMode: provisioned
-      EngineVersion: '15.4'
       DatabaseName: participantes
       MasterUsername: !Ref DBMasterUsername
       MasterUserPassword: !Ref DBMasterPassword
