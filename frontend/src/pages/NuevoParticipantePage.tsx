@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
 import ParticipanteForm from '@/components/ParticipanteForm'
 import { participantesApi } from '@/services/participantes'
-import type { ParticipanteCreate } from '@/types/participante'
+import type { ParticipanteCreate, ParticipanteUpdate } from '@/types/participante'
 
 export default function NuevoParticipantePage() {
   const navigate = useNavigate()
@@ -22,8 +22,8 @@ export default function NuevoParticipantePage() {
     },
   })
 
-  const handleSubmit = (data: ParticipanteCreate) => {
-    createMutation.mutate(data)
+  const handleSubmit = (data: ParticipanteCreate | ParticipanteUpdate) => {
+    createMutation.mutate(data as ParticipanteCreate)
   }
 
   return (

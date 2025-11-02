@@ -15,7 +15,10 @@
       "Bash(sam deploy:*)",
       "Bash(cat:*)",
       "Bash(aws secretsmanager get-secret-value:*)",
-      "Bash(psql:*)"
+      "Bash(psql:*)",
+      "Bash(npm run build:*)",
+      "Bash(aws s3 sync:*)",
+      "Bash(node scripts/upload-s3.js:*)"
     ],
     "deny": [],
     "ask": []
