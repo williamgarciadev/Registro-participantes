@@ -10,7 +10,12 @@
       "Bash(docker:*)",
       "Bash(docker-compose:*)",
       "Bash(curl:*)",
-      "Bash(python -m json.tool:*)"
+      "Bash(python -m json.tool:*)",
+      "Bash(sam build:*)",
+      "Bash(sam deploy:*)",
+      "Bash(cat:*)",
+      "Bash(aws secretsmanager get-secret-value:*)",
+      "Bash(psql:*)"
     ],
     "deny": [],
     "ask": []

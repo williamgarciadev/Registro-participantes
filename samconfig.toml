@@ -5,7 +5,7 @@ stack_name = "registro-participantes-dev"
 resolve_s3 = true
 s3_prefix = "registro-participantes-dev"
 confirm_changeset = true
-capabilities = "CAPABILITY_IAM"
+capabilities = "CAPABILITY_IAM CAPABILITY_NAMED_IAM"
 disable_rollback = true
 parameter_overrides = "Stage=\"dev\" DBMasterUsername=\"postgres\" DBMasterPassword=\"Cucuta.2025$\""
 image_repositories = []
