@@ -18,7 +18,8 @@
       "Bash(psql:*)",
       "Bash(npm run build:*)",
       "Bash(aws s3 sync:*)",
-      "Bash(node scripts/upload-s3.js:*)"
+      "Bash(node scripts/upload-s3.js:*)",
+      "Bash(python scripts/upload_s3.py:*)"
     ],
     "deny": [],
     "ask": []
