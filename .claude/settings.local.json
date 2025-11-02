@@ -19,7 +19,9 @@
       "Bash(npm run build:*)",
       "Bash(aws s3 sync:*)",
       "Bash(node scripts/upload-s3.js:*)",
-      "Bash(python scripts/upload_s3.py:*)"
+      "Bash(python scripts/upload_s3.py:*)",
+      "Bash(sam list resources:*)",
+      "Bash(python scripts/invalidate_cloudfront.py:*)"
     ],
     "deny": [],
     "ask": []

@@ -17,18 +17,49 @@ region = 'us-east-1'
 
 s3_client = boto3.client('s3', region_name=region)
 
+def get_content_type(file_path):
+    """Obtener MIME type correcto para cada archivo"""
+    ext = str(file_path).lower()
+
+    # MIME types explícitos para archivos críticos
+    mime_types = {
+        '.html': 'text/html',
+        '.js': 'application/javascript',
+        '.mjs': 'application/javascript',
+        '.css': 'text/css',
+        '.json': 'application/json',
+        '.png': 'image/png',
+        '.jpg': 'image/jpeg',
+        '.jpeg': 'image/jpeg',
+        '.svg': 'image/svg+xml',
+        '.gif': 'image/gif',
+        '.ico': 'image/x-icon',
+        '.woff': 'font/woff',
+        '.woff2': 'font/woff2',
+        '.ttf': 'font/ttf',
+        '.eot': 'application/vnd.ms-fontobject',
+        '.map': 'application/json'
+    }
+
+    # Buscar por extensión
+    for ext_key, mime in mime_types.items():
+        if ext.endswith(ext_key):
+            return mime
+
+    # Por defecto
+    guessed, _ = mimetypes.guess_type(str(file_path))
+    return guessed or 'application/octet-stream'
+
 def upload_directory(local_path, s3_prefix=''):
     """Subir todos los archivos de un directorio a S3"""
     for root, dirs, files in os.walk(local_path):
         for file in files:
             file_path = Path(root) / file
             relative_path = file_path.relative_to(local_path)
-            s3_key = f"{s3_prefix}/{relative_path}".lstrip('/')
+            s3_key = f"{s3_prefix}/{relative_path}".lstrip('/').replace('\\', '/')
 
             # Determinar MIME type
-            mime_type, _ = mimetypes.guess_type(file_path)
-            if mime_type is None:
-                mime_type = 'application/octet-stream'
+            mime_type = get_content_type(file_path)
 
             # Subir archivo
             try:
@@ -38,7 +69,7 @@ def upload_directory(local_path, s3_prefix=''):
                     s3_key,
                     ExtraArgs={'ContentType': mime_type}
                 )
-                print(f"[+] Uploaded: {s3_key}")
+                print(f"[+] Uploaded: {s3_key} (type: {mime_type})")
             except Exception as e:
                 print(f"[-] Error uploading {s3_key}: {e}")
 
