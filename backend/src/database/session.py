@@ -5,6 +5,7 @@ import json
 import boto3
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession, async_sessionmaker
 from sqlalchemy.orm import declarative_base
+from sqlalchemy import text
 from aws_lambda_powertools import Logger
 
 from src.core.config import settings
@@ -72,6 +73,50 @@ async def init_db():
     )
 
     logger.info("Base de datos inicializada correctamente")
+
+
+async def create_tables():
+    """Crear tablas e índices en la base de datos"""
+    async with engine.begin() as conn:
+        # Crear extensión UUID
+        await conn.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'))
+
+        # Crear tabla participantes
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS participantes (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                nombre VARCHAR(100) NOT NULL,
+                apellido VARCHAR(100) NOT NULL,
+                email VARCHAR(255) UNIQUE NOT NULL,
+                telefono VARCHAR(20),
+                estado VARCHAR(20) DEFAULT 'activo' NOT NULL,
+                fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                extra_data JSONB DEFAULT NULL
+            )
+        """))
+
+        # Crear índices
+        await conn.execute(text('CREATE INDEX IF NOT EXISTS idx_participantes_email ON participantes(email)'))
+        await conn.execute(text('CREATE INDEX IF NOT EXISTS idx_participantes_estado ON participantes(estado)'))
+        await conn.execute(text('CREATE INDEX IF NOT EXISTS idx_participantes_fecha_registro ON participantes(fecha_registro)'))
+
+        # Crear tabla registros_actividad
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS registros_actividad (
+                id SERIAL PRIMARY KEY,
+                participante_id UUID REFERENCES participantes(id) ON DELETE CASCADE,
+                tipo_evento VARCHAR(100),
+                descripcion TEXT,
+                fecha TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                usuario VARCHAR(255)
+            )
+        """))
+
+        # Crear índices de actividad
+        await conn.execute(text('CREATE INDEX IF NOT EXISTS idx_actividad_participante ON registros_actividad(participante_id)'))
+        await conn.execute(text('CREATE INDEX IF NOT EXISTS idx_actividad_fecha ON registros_actividad(fecha)'))
+
+        logger.info("Tablas creadas correctamente")
 
 
 async def get_db():

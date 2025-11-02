@@ -9,7 +9,7 @@ from aws_lambda_powertools.logging import correlation_paths
 
 from src.api.v1 import router as api_v1_router
 from src.core.config import settings
-from src.database.session import init_db
+from src.database.session import init_db, create_tables
 
 # Configurar logger y tracer de AWS
 logger = Logger(service=settings.SERVICE_NAME)
@@ -65,6 +65,22 @@ def root():
 def health_check():
     """Endpoint de health check"""
     return {"status": "healthy"}
+
+
+@app.post("/init-db", tags=["Admin"])
+@tracer.capture_method
+async def init_database():
+    """Endpoint para inicializar tablas en la base de datos"""
+    logger.info("Inicializando tablas de la base de datos")
+    try:
+        from src.database.session import engine
+        if engine is None:
+            await init_db()
+        await create_tables()
+        return {"status": "ok", "message": "Tablas creadas correctamente"}
+    except Exception as e:
+        logger.error(f"Error al crear tablas: {str(e)}")
+        return {"status": "error", "message": str(e)}
 
 
 # Incluir routers de la API
