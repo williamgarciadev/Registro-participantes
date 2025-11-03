@@ -367,6 +367,46 @@ class UserService:
         await db.flush()
 
     @staticmethod
+    async def update_user_roles(db: AsyncSession, user_id: UUID, role_ids: List[UUID]) -> User:
+        """
+        Actualiza los roles de un usuario específico.
+        
+        Args:
+            db: Sesión asíncrona de base de datos
+            user_id: ID del usuario a actualizar
+            role_ids: Lista de IDs de roles a asignar (reemplaza los existentes)
+            
+        Returns:
+            Usuario actualizado con sus nuevos roles
+            
+        Raises:
+            HTTPException 404: Si el usuario no existe
+            HTTPException 400: Si algún rol no existe
+        """
+        user = await UserService.get_by_id(db, user_id)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, 
+                detail="Usuario no encontrado"
+            )
+        
+        # Validar que todos los roles existen
+        roles = await UserService.get_roles_by_ids(db, role_ids)
+        if len(roles) != len(role_ids):
+            found_ids = {role.id for role in roles}
+            missing_ids = set(role_ids) - found_ids
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Roles no encontrados: {missing_ids}"
+            )
+        
+        # Asignar nuevos roles
+        user.roles = roles
+        await db.flush()
+        await db.refresh(user)
+        return user
+
+    @staticmethod
     async def list_users(
         db: AsyncSession,
         *,

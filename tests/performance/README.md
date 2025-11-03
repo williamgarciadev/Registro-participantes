@@ -15,7 +15,7 @@ Este directorio contiene tests de carga con K6 para probar el sistema de partici
    ```
 
 3. **Usuario admin creado:**
-   - Email: `admin@demo.local`
+   - Email: `admin@example.com`
    - Password: `admin123`
 
 ## 🔔 Test del Sistema de Notificaciones
@@ -119,7 +119,7 @@ docker run --rm \
 ## 🌐 Ver las Notificaciones en Tiempo Real
 
 1. **Abre el frontend:** http://localhost:3000
-2. **Login:** `admin@demo.local` / `admin123`
+2. **Login:** `admin@example.com` / `admin123`
 3. **Observa el icono de la campana** en la barra superior derecha
 4. **Ejecuta el test** con el script
 5. **Mira cómo aparecen las notificaciones:**

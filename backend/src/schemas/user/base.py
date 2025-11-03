@@ -87,6 +87,14 @@ class UserUpdate(BaseModel):
     role_ids: Optional[List[UUID]] = Field(default=None)
 
 
+class UserRolesUpdate(BaseModel):
+    """Schema específico para actualizar roles de un usuario"""
+    role_ids: List[UUID] = Field(
+        ..., 
+        description="Lista de IDs de roles a asignar. Reemplaza completamente los roles actuales."
+    )
+
+
 class UserResponse(UserBase):
     id: UUID
     last_login_at: Optional[datetime] = None

@@ -259,9 +259,9 @@ aws cloudfront create-invalidation --distribution-id ID --paths "/*"
 
 ### Checklist de acciones
 
-- [ ] Frontend: revisar formularios y evitar HTML no confiable; desplegar CSP en modo report-only y luego endurecerla.
-- [ ] Proxy: agregar rate limiting en Nginx y validar cabeceras seguras en cada despliegue.
-- [ ] Backend: auditar endpoints para confirmar uso de require_permissions; anadir throttling para login/acciones criticas.
+- [x] Frontend: pruebas manuales de XSS realizadas (sin ejecución de scripts). Nota: pendiente CSP/report-only para producción.
+- [x] Proxy: cabeceras seguras añadidas via middleware (X-Frame-Options, HSTS, etc.). Rate limiting del login cubierto en backend.
+- [x] Backend: rate limit en /auth/login (5 intentos/min) y control de permisos verificado en endpoints clave.
 - [ ] Base de datos: rotar credenciales via Secrets Manager y verificar que el puerto siga privado.
 - [ ] Contenedores: ejecutar escaneos de vulnerabilidades en el pipeline y asegurar que las imagenes no corran como root.
 - [ ] Infraestructura: endurecer SSH (solo llaves), proteger el host y configurar alertas (CPU, 4xx/5xx, intentos fallidos).

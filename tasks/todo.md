@@ -36,7 +36,7 @@ Resolver el error CORS y el error 500 en el endpoint de login para que el fronte
 ### 4. Documentar Solución ✅
 - [x] Commit realizado con todos los cambios
 - [x] Login funcionando end-to-end
-- [x] Usuario admin creado: admin@demo.local / admin123
+- [x] Usuario admin creado: admin@example.com / admin123
 
 ---
 

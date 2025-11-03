@@ -14,6 +14,7 @@ from src.schemas.user.base import (
     RoleUpdate,
     UserCreate,
     UserResponse,
+    UserRolesUpdate,
     UserSummary,
     UserUpdate,
 )
@@ -101,6 +102,32 @@ async def update_user(user_id: UUID, payload: UserUpdate, db: AsyncSession = Dep
 )
 async def delete_user(user_id: UUID, db: AsyncSession = Depends(get_db)):
     await UserService.delete_user(db, user_id)
+
+
+@router.put(
+    "/users/{user_id}/roles",
+    response_model=UserResponse,
+    summary="Actualizar roles de usuario",
+    description="Asigna o modifica los roles de un usuario. Reemplaza completamente los roles actuales.",
+    dependencies=[Depends(require_permissions("users:manage"))],
+)
+async def update_user_roles(
+    user_id: UUID, 
+    payload: UserRolesUpdate, 
+    db: AsyncSession = Depends(get_db)
+):
+    """
+    Actualiza los roles de un usuario específico.
+    
+    Este endpoint permite:
+    - Asignar nuevos roles a un usuario
+    - Modificar roles existentes
+    - Remover todos los roles (enviando lista vacía)
+    
+    **Nota:** Los roles son reemplazados completamente, no se agregan a los existentes.
+    """
+    user = await UserService.update_user_roles(db, user_id, payload.role_ids)
+    return user
 
 
 @router.get(

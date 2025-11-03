@@ -55,6 +55,13 @@ export const adminApi = {
     await api.delete(`${BASE_URL}/users/${id}`)
   },
 
+  async updateUserRoles(userId: string, roleIds: string[]) {
+    const { data } = await api.put<UserSummary>(`${BASE_URL}/users/${userId}/roles`, {
+      role_ids: roleIds,
+    })
+    return data
+  },
+
   async createRole(payload: { name: string; description?: string; permission_ids?: string[] }) {
     const { data } = await api.post(`${BASE_URL}/roles`, payload)
     return data

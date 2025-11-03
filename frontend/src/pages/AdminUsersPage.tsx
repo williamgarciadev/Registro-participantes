@@ -1,6 +1,7 @@
 import { FormEvent, useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Search, UserPlus, Users as UsersIcon, Shield, CheckCircle, XCircle, Crown } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
+import { Search, UserPlus, Users as UsersIcon, Shield, CheckCircle, XCircle, Crown, Settings } from 'lucide-react'
 
 import { adminApi } from '@/services/admin'
 import type { UserSummary, UserResponse } from '@/types/admin'
@@ -14,6 +15,7 @@ type FilterStatus = 'all' | 'active' | 'inactive'
 export default function AdminUsersPage() {
   const { hasPermission } = useAuth()
   const canManageUsers = hasPermission('users:manage')
+  const navigate = useNavigate()
 
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
@@ -228,6 +230,11 @@ export default function AdminUsersPage() {
                   <th className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-wide text-neutral-500">
                     Tipo
                   </th>
+                  {canManageUsers && (
+                    <th className="px-6 py-3 text-right text-xs font-semibold uppercase tracking-wide text-neutral-500">
+                      Acciones
+                    </th>
+                  )}
                 </tr>
               </thead>
               <tbody className="divide-y divide-neutral-100 bg-white">
@@ -284,6 +291,20 @@ export default function AdminUsersPage() {
                         <span className="text-xs text-neutral-500">Usuario</span>
                       )}
                     </td>
+
+                    {canManageUsers && (
+                      <td className="px-6 py-4 text-right">
+                        <button
+                          type="button"
+                          onClick={() => navigate(`/admin/users/${user.id}/roles`)}
+                          className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-3 py-1.5 text-xs font-medium text-blue-700 transition-colors hover:bg-blue-100"
+                          aria-label={`Gestionar roles de ${user.email}`}
+                        >
+                          <Settings className="h-3.5 w-3.5" />
+                          Gestionar Roles
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

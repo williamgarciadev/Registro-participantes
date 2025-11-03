@@ -106,7 +106,7 @@ async def ensure_admin_role(db: AsyncSession) -> None:
         try:
             await UserService.create_user(
                 db,
-                email="admin@demo.local",
+                email="admin@example.com",
                 hashed_password=hashed_password,
                 full_name="Administrador",
                 is_superuser=True,

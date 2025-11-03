@@ -8,7 +8,7 @@ import { LogIn } from 'lucide-react'
  * El equipo de auth está implementando la versión funcional en LoginPage.tsx
  */
 export default function LoginPreview() {
-  const [email, setEmail] = useState('admin@demo.local')
+  const [email, setEmail] = useState('admin@example.com')
   const [password, setPassword] = useState('admin123')
   const [isAuthenticating, setIsAuthenticating] = useState(false)
 

@@ -1,11 +1,12 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
-import { Shield, Search, Users as UsersIcon, Key, ChevronDown, ChevronUp } from 'lucide-react'
+import { Shield, Search, Users as UsersIcon, Key, ChevronDown, ChevronUp, Settings } from 'lucide-react'
 
 import { adminApi } from '@/services/admin'
 import { useAuth } from '@/components/AuthProvider'
 import type { RoleResponse } from '@/types/admin'
 import RoleModal from '@/components/RoleModal'
+import RolePermissionsModal from '@/components/RolePermissionsModal'
 
 export default function AdminRolesPage() {
   const { hasPermission } = useAuth()
@@ -18,6 +19,10 @@ export default function AdminRolesPage() {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedRole, setSelectedRole] = useState<RoleResponse | null>(null)
   const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
+  
+  // Permissions modal state
+  const [isPermissionsModalOpen, setIsPermissionsModalOpen] = useState(false)
+  const [roleForPermissions, setRoleForPermissions] = useState<RoleResponse | null>(null)
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['admin-roles'],
@@ -231,24 +236,40 @@ export default function AdminRolesPage() {
                         </div>
                       </div>
 
-                      <button
-                        type="button"
-                        className="btn btn-secondary btn-sm"
-                        onClick={() => toggleRole(role.id)}
-                        aria-label={isExpanded ? 'Contraer detalles' : 'Expandir detalles'}
-                      >
-                        {isExpanded ? (
-                          <>
-                            <ChevronUp className="h-4 w-4" />
-                            Contraer
-                          </>
-                        ) : (
-                          <>
-                            <ChevronDown className="h-4 w-4" />
-                            Ver permisos
-                          </>
+                      <div className="flex items-center gap-2">
+                        {canManageRoles && (
+                          <button
+                            type="button"
+                            className="btn btn-primary btn-sm"
+                            onClick={() => {
+                              setRoleForPermissions(role)
+                              setIsPermissionsModalOpen(true)
+                            }}
+                            aria-label={`Gestionar permisos de ${role.name}`}
+                          >
+                            <Settings className="h-4 w-4" />
+                            Gestionar Permisos
+                          </button>
                         )}
-                      </button>
+                        <button
+                          type="button"
+                          className="btn btn-secondary btn-sm"
+                          onClick={() => toggleRole(role.id)}
+                          aria-label={isExpanded ? 'Contraer detalles' : 'Expandir detalles'}
+                        >
+                          {isExpanded ? (
+                            <>
+                              <ChevronUp className="h-4 w-4" />
+                              Contraer
+                            </>
+                          ) : (
+                            <>
+                              <ChevronDown className="h-4 w-4" />
+                              Ver permisos
+                            </>
+                          )}
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -317,6 +338,18 @@ export default function AdminRolesPage() {
         role={selectedRole}
         mode={modalMode}
       />
+
+      {/* Role Permissions Modal */}
+      {roleForPermissions && (
+        <RolePermissionsModal
+          isOpen={isPermissionsModalOpen}
+          onClose={() => {
+            setIsPermissionsModalOpen(false)
+            setRoleForPermissions(null)
+          }}
+          role={roleForPermissions}
+        />
+      )}
     </div>
   )
 }

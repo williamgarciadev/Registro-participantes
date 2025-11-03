@@ -8,7 +8,7 @@ export default function LoginPage() {
   const { login, isAuthenticating, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
-  const [email, setEmail] = useState('admin@demo.local')
+  const [email, setEmail] = useState('admin@example.com')
   const [password, setPassword] = useState('admin123')
 
   if (user) {
