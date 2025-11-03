@@ -4,6 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
+from aws_lambda_powertools import Logger
 
 from src.core.config import settings
 from src.core.security import create_access_token, get_current_user, get_password_hash, verify_password
@@ -13,6 +14,7 @@ from src.schemas.auth.token import AuthenticatedUser, LoginRequest, TokenRespons
 from src.services.user_service import UserService
 
 router = APIRouter()
+logger = Logger()
 
 
 async def authenticate_user(db: AsyncSession, email: str, password: str) -> User | None:
@@ -28,50 +30,55 @@ async def ensure_admin_role(db: AsyncSession) -> None:
     Garantiza que exista el rol admin y un usuario inicial.
     Pensado para entornos demo/desarrollo; en producción se debe provisionar fuera de la API.
     """
-    admin_role = await UserService.get_role_by_name(db, "admin")
-    if admin_role:
-        return
-
-    view_participants = await UserService.create_permission(
-        db,
-        code="participantes:view",
-        name="Ver participantes",
-        description="Listar y consultar participantes",
-    )
-    manage_participants = await UserService.create_permission(
-        db,
-        code="participantes:manage",
-        name="Gestionar participantes",
-        description="Crear, editar y eliminar participantes",
-    )
-    view_reports = await UserService.create_permission(
-        db,
-        code="reports:view",
-        name="Ver reportes",
-        description="Consultar paneles e indicadores agregados",
-    )
-
-    admin_role = await UserService.create_role(
-        db,
-        name="admin",
-        description="Administrador del sistema",
-        permissions=[view_participants, manage_participants, view_reports],
-    )
-
-    hashed_password = get_password_hash("admin123")
-
     try:
-        await UserService.create_user(
+        admin_role = await UserService.get_role_by_name(db, "admin")
+        if admin_role:
+            return
+
+        view_participants = await UserService.create_permission(
             db,
-            email="admin@demo.local",
-            hashed_password=hashed_password,
-            full_name="Administrador",
-            is_superuser=True,
-            roles=[admin_role],
+            code="participantes:view",
+            name="Ver participantes",
+            description="Listar y consultar participantes",
         )
-    except HTTPException:
-        # Usuario ya existe, no es necesario duplicarlo
-        pass
+        manage_participants = await UserService.create_permission(
+            db,
+            code="participantes:manage",
+            name="Gestionar participantes",
+            description="Crear, editar y eliminar participantes",
+        )
+        view_reports = await UserService.create_permission(
+            db,
+            code="reports:view",
+            name="Ver reportes",
+            description="Consultar paneles e indicadores agregados",
+        )
+
+        admin_role = await UserService.create_role(
+            db,
+            name="admin",
+            description="Administrador del sistema",
+            permissions=[view_participants, manage_participants, view_reports],
+        )
+
+        hashed_password = get_password_hash("admin123")
+
+        try:
+            await UserService.create_user(
+                db,
+                email="admin@demo.local",
+                hashed_password=hashed_password,
+                full_name="Administrador",
+                is_superuser=True,
+                roles=[admin_role],
+            )
+        except HTTPException:
+            # Usuario ya existe, no es necesario duplicarlo
+            pass
+    except Exception as e:
+        # Log el error pero no falla el endpoint
+        logger.error(f"Error en ensure_admin_role: {str(e)}")
+        raise
 
 
 @router.post(

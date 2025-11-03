@@ -26,8 +26,13 @@ class Settings(BaseSettings):
     # AWS
     AWS_REGION: str = "us-east-1"
 
-    # CORS
-    CORS_ORIGINS: List[str] = ["*"]  # En producción, especificar dominios permitidos
+    # CORS - Lista de orígenes permitidos
+    CORS_ORIGINS: List[str] = [
+        "http://localhost:3000",  # Frontend local
+        "http://localhost:5173",  # Vite dev server
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:5173",
+    ]
 
     # Logging
     LOG_LEVEL: str = "INFO"

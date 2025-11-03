@@ -15,8 +15,13 @@ from src.database.session import get_db
 from src.models.user import User
 from src.services.user_service import UserService
 
-# Contexto para hash de contraseñas
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Contexto para hash de contraseñas con configuración explícita para evitar problemas
+# de inicialización de bcrypt en contenedores
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto",
+    bcrypt__rounds=12,  # Número de rondas explícito
+)
 
 # Esquema OAuth2 para FastAPI
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")

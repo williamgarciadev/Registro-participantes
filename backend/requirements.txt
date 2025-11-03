@@ -25,6 +25,7 @@ aws-xray-sdk==2.12.1
 # Validación
 email-validator==2.1.0.post1
 
-# Seguridad
+# Seguridad - Versiones actualizadas para compatibilidad
+bcrypt==4.2.1
 passlib[bcrypt]==1.7.4
 python-jose[cryptography]==3.3.0

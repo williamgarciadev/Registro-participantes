@@ -1,7 +1,7 @@
 """
 Modelos relacionados con usuarios, roles y permisos
 """
-from datetime import datetime
+from datetime import datetime, timezone
 import uuid
 from sqlalchemy import (
     Column,
@@ -17,6 +17,11 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from src.database.session import Base
+
+
+def utcnow():
+    """Helper para obtener datetime UTC con timezone info"""
+    return datetime.now(timezone.utc)
 
 
 user_roles = Table(
@@ -47,8 +52,8 @@ class Role(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(String(50), unique=True, nullable=False, index=True)
     description = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
 
     permissions = relationship(
         "Permission",
@@ -76,8 +81,8 @@ class Permission(Base):
     code = Column(String(100), unique=True, nullable=False, index=True)
     name = Column(String(100), nullable=False)
     description = Column(String(255), nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    created_at = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
 
     roles = relationship(
         "Role",
@@ -101,9 +106,9 @@ class User(Base):
     full_name = Column(String(150), nullable=True)
     is_active = Column(Boolean, default=True, nullable=False)
     is_superuser = Column(Boolean, default=False, nullable=False)
-    last_login_at = Column(DateTime, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    last_login_at = Column(DateTime(timezone=True), nullable=True)
+    created_at = Column(DateTime(timezone=True), default=utcnow, nullable=False)
+    updated_at = Column(DateTime(timezone=True), default=utcnow, onupdate=utcnow, nullable=False)
 
     roles = relationship(
         "Role",

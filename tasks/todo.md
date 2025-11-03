@@ -1,3 +1,43 @@
+# ⚠️ PLAN URGENTE: Arreglar Error CORS y Login
+
+## 🎯 Objetivo
+Resolver el error CORS y el error 500 en el endpoint de login para que el frontend pueda autenticarse correctamente.
+
+## 🔍 Problemas Identificados
+1. **Error CORS**: Frontend en `http://localhost:3000` bloqueado al acceder a `http://localhost:8000`
+2. **Error HTTP 500**: El endpoint `/api/v1/auth/login/json` está fallando
+3. **Posible causa**: Error en `ensure_admin_role()` al crear tablas/datos iniciales
+
+## 📋 Tareas
+
+### 1. Verificar y Mejorar Configuración CORS ✅
+- [x] Actualizar CORS_ORIGINS para incluir explícitamente `http://localhost:3000`
+- [x] Verificar que el middleware CORS se aplique correctamente
+- [x] Agregar logs para debug CORS
+
+### 2. Arreglar Error 500 en Login ✅
+- [x] Revisar logs del backend para ver el error exacto
+- [x] Identificar causa: tablas no creadas, error bcrypt
+- [x] Ejecutar `/init-db` para crear tablas
+- [x] Agregar dependencias de compilación para bcrypt (gcc, g++, make, libffi-dev)
+- [x] Reconstruir y reiniciar contenedor backend
+- [x] Actualizar versiones de bcrypt y passlib
+- [x] Arreglar problema de timezone en modelos
+- [x] Login funcionando correctamente desde API
+
+### 3. Verificar Funcionamiento 🔄
+- [x] Backend responde correctamente a /health
+- [x] Login desde curl funciona y retorna token
+- [ ] Probar login desde frontend en navegador
+- [ ] Verificar que el token se reciba correctamente en frontend
+- [ ] Confirmar que no hay más errores CORS
+
+### 4. Documentar Solución ⏳
+- [ ] Actualizar documentación con la solución
+- [ ] Agregar notas sobre configuración CORS local vs producción
+
+---
+
 # Plan de Mejoras: Estilo AdminLTE v3
 
 ## 🎯 Objetivo
