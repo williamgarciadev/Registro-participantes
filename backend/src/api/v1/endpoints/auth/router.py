@@ -53,12 +53,51 @@ async def ensure_admin_role(db: AsyncSession) -> None:
             name="Ver reportes",
             description="Consultar paneles e indicadores agregados",
         )
+        view_users = await UserService.create_permission(
+            db,
+            code="users:view",
+            name="Ver usuarios",
+            description="Listar y consultar usuarios del sistema",
+        )
+        manage_users = await UserService.create_permission(
+            db,
+            code="users:manage",
+            name="Gestionar usuarios",
+            description="Crear, actualizar y desactivar usuarios",
+        )
+        view_roles = await UserService.create_permission(
+            db,
+            code="roles:view",
+            name="Ver roles",
+            description="Consultar roles disponibles en el sistema",
+        )
+        manage_roles = await UserService.create_permission(
+            db,
+            code="roles:manage",
+            name="Gestionar roles",
+            description="Crear y actualizar roles",
+        )
+        view_permissions = await UserService.create_permission(
+            db,
+            code="permissions:view",
+            name="Ver permisos",
+            description="Listar los permisos configurados",
+        )
 
         admin_role = await UserService.create_role(
             db,
             name="admin",
             description="Administrador del sistema",
-            permissions=[view_participants, manage_participants, view_reports],
+            permissions=[
+                view_participants,
+                manage_participants,
+                view_reports,
+                view_users,
+                manage_users,
+                view_roles,
+                manage_roles,
+                view_permissions,
+            ],
         )
 
         hashed_password = get_password_hash("admin123")
