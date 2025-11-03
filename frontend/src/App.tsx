@@ -4,12 +4,16 @@ import HomePage from './pages/HomePage'
 import ParticipantesPage from './pages/ParticipantesPage'
 import NuevoParticipantePage from './pages/NuevoParticipantePage'
 import EditarParticipantePage from './pages/EditarParticipantePage'
+import LoginPage from './pages/LoginPage'
 import LoginPreview from './pages/LoginPreview'
 
 function App() {
   return (
     <>
       <Routes>
+        {/* Ruta de login funcional */}
+        <Route path="/login" element={<LoginPage />} />
+        
         {/* Ruta temporal para preview del diseño del login */}
         <Route path="/login-preview" element={<LoginPreview />} />
         
