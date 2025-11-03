@@ -348,7 +348,7 @@
     width: 18rem;
     background: var(--color-sidebar-bg);
     color: var(--color-sidebar-text);
-    padding: var(--space-4) 0; /* AdminLTE sidebar compacto */
+    padding: 0; /* Sin padding general, lo controla cada sección */
     box-shadow: var(--shadow-sidebar);
     transform: translateX(-100%);
     transition: transform var(--motion-base), box-shadow var(--motion-base);
@@ -364,7 +364,8 @@
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    margin-bottom: var(--space-6);
+    margin-bottom: var(--space-4); /* Reducido de space-6 */
+    padding: var(--space-4) var(--space-4); /* AdminLTE header compacto */
   }
 
   .dashboard-sidebar__logo {
@@ -405,16 +406,17 @@
     flex-direction: column;
     gap: 0.25rem;
     flex: 1;
+    padding: 0 var(--space-3); /* Padding lateral para nav items */
   }
 
   .dashboard-nav-link {
     display: flex;
     align-items: center;
     gap: var(--space-3);
-    padding: 0.75rem 1rem;
+    padding: 0.625rem 1rem; /* AdminLTE compacto (10px 16px) */
     border-radius: var(--radius-md);
     color: var(--color-sidebar-text-muted);
-    font-size: var(--text-sm);
+    font-size: 0.875rem; /* 14px */
     font-weight: var(--font-weight-medium);
     transition: background var(--motion-fast), color var(--motion-fast), transform var(--motion-fast);
     text-decoration: none;
@@ -449,8 +451,8 @@
   }
 
   .dashboard-sidebar__footer {
-    margin-top: var(--space-8);
-    padding-top: var(--space-4);
+    margin-top: var(--space-4); /* Reducido */
+    padding: var(--space-3) var(--space-4); /* AdminLTE compacto */
     border-top: 1px solid var(--color-sidebar-border);
     font-size: var(--text-xs);
     color: var(--color-sidebar-text-muted);
@@ -627,7 +629,7 @@
 
   .dashboard-main {
     flex: 1;
-    padding: var(--space-5) var(--space-5); /* AdminLTE compacto */
+    padding: var(--space-4); /* AdminLTE ultra-compacto (12px) */
   }
 
   .dashboard-main__inner {

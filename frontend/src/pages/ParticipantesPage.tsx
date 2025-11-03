@@ -145,7 +145,7 @@ export default function ParticipantesPage() {
   }
 
   return (
-    <div className="space-y-8 pb-16">
+    <div className="space-y-4 pb-8">
       <nav className="flex items-center gap-2 text-sm text-tertiary" aria-label="Ruta de navegación">
         <Link to="/" className="transition-colors hover:text-primary-600">
           Panel
@@ -154,10 +154,10 @@ export default function ParticipantesPage() {
         <span className="text-secondary">Participantes</span>
       </nav>
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
         <div>
           <h1 className="heading-1">Participantes</h1>
-          <p className="text-secondary mt-1" aria-live="polite">
+          <p className="text-secondary mt-0.5" aria-live="polite">
             {total !== undefined
               ? `${total} participante${total !== 1 ? 's' : ''} registrado${total !== 1 ? 's' : ''}`
               : 'Cargando...'}
@@ -169,7 +169,7 @@ export default function ParticipantesPage() {
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         <div className="stat-card animate-slide-up" style={{ animationDelay: '50ms' }}>
           <div className="flex items-start justify-between">
             <div>

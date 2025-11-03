@@ -24,14 +24,14 @@ export default function HomePage() {
   }, [resetHeader, setHeader])
 
   return (
-    <div className="space-y-10 pb-16">
+    <div className="space-y-6 pb-8">
       <section className="card animate-fade-in">
-        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="text-left md:max-w-3xl">
             <h1 className="heading-1 bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
               Sistema de registro de participantes
             </h1>
-            <p className="text-secondary mt-3 text-lg leading-relaxed">
+            <p className="text-secondary mt-2 text-lg leading-relaxed">
               Administra inscripciones, asistencia y gestiona la información clave de tus eventos desde un
               panel centralizado, con una experiencia moderna basada en React y desplegada sobre infraestructura
               serverless en AWS.
@@ -44,7 +44,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <section className="grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
         <div className="stat-card animate-slide-up" style={{ animationDelay: '100ms' }}>
           <span className="stat-card__icon stat-card__icon--primary">
             <Users className="h-5 w-5" aria-hidden="true" />
