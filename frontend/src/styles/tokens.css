@@ -19,17 +19,16 @@
   --leading-normal: 1.5;
   --leading-relaxed: 1.625;
 
-  /* Spacing (8px scale) */
+  /* Spacing scale - AdminLTE compacto */
   --space-0: 0;
-  --space-1: 0.25rem;
-  --space-2: 0.5rem;
-  --space-3: 0.75rem;
-  --space-4: 1rem;
-  --space-6: 1.5rem;
-  --space-8: 2rem;
-  --space-10: 2.5rem;
-  --space-12: 3rem;
-  --space-16: 4rem;
+  --space-1: 0.25rem;   /* 4px */
+  --space-2: 0.5rem;    /* 8px */
+  --space-3: 0.625rem;  /* 10px - reducido */
+  --space-4: 0.75rem;   /* 12px - reducido */
+  --space-5: 1rem;      /* 16px - reducido */
+  --space-6: 1.25rem;   /* 20px - reducido */
+  --space-8: 1.5rem;    /* 24px - reducido */
+  --space-10: 2rem;     /* 32px - reducido */
 
   /* Radius - AdminLTE v3 uses smaller radius */
   --radius-sm: 0.2rem;
