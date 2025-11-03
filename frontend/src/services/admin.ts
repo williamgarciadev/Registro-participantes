@@ -3,6 +3,7 @@ import type {
   PaginatedPermissions,
   PaginatedRoles,
   PaginatedUsers,
+  PermissionCatalogResponse,
   UserSummary,
 } from '@/types/admin'
 
@@ -32,6 +33,11 @@ export const adminApi = {
     const { data } = await api.get<PaginatedPermissions>(`${BASE_URL}/permissions`, {
       params,
     })
+    return data
+  },
+
+  async getPermissionsCatalog() {
+    const { data } = await api.get<PermissionCatalogResponse>(`${BASE_URL}/permissions/catalog`)
     return data
   },
 }
