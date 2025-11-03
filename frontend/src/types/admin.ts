@@ -45,3 +45,16 @@ export interface PaginatedPermissions {
   limit: number
   offset: number
 }
+
+export interface PermissionCatalogItem {
+  code: string
+  name: string
+  description?: string | null
+  module: string
+  action: string
+}
+
+export interface PermissionCatalogResponse {
+  total: number
+  modules: Record<string, PermissionCatalogItem[]>
+}

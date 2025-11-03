@@ -266,9 +266,9 @@ aws cloudfront create-invalidation --distribution-id ID --paths "/*"
 - [ ] Contenedores: ejecutar escaneos de vulnerabilidades en el pipeline y asegurar que las imagenes no corran como root.
 - [ ] Infraestructura: endurecer SSH (solo llaves), proteger el host y configurar alertas (CPU, 4xx/5xx, intentos fallidos).
 
-```
+## 🔐 Variables de Entorno
 
-## 🔐 Variables de Entorno Backend
+### Backend
 
 ```bash
 DATABASE_URL=postgresql://user:pass@host:5432/dbname
