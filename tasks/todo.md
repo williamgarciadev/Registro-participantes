@@ -5,49 +5,33 @@ Transformar la UI actual para que tenga el look & feel profesional de AdminLTE v
 
 ## 📋 Tareas
 
-### 1. Sistema de Colores y Tokens 🔄
+### 1. Sistema de Colores y Tokens ✅
 - [x] Actualizar paleta de colores para coincidir con AdminLTE v3
 - [x] Ajustar colores del sidebar (gris más oscuro #343a40)
 - [x] Actualizar colores de botones y estados
 - [x] Mejorar contraste de textos
+- [x] Reducir espaciado global (compacto AdminLTE)
+- [x] Fix margin-left excesivo
 
-### 2. Topbar/Header Profesional ⏳
-- [ ] Rediseñar topbar con fondo blanco limpio
-- [ ] Agregar barra de búsqueda global estilo AdminLTE
-- [ ] Mejorar dropdown de usuario con avatar
-- [ ] Añadir notificaciones dropdown
-- [ ] Agregar breadcrumbs más prominentes
+### 2. Formularios AdminLTE PRO ✅
+- [x] Separar en cards con headers
+- [x] Inputs AdminLTE (38px altura)
+- [x] Labels semibold con colores correctos
+- [x] Mensajes de error con iconos
+- [x] Footer con botones alineados
 
-### 3. Sidebar Mejorado ⏳
-- [ ] Ajustar colores a tema AdminLTE (#343a40)
-- [ ] Mejorar hover states en navegación
-- [ ] Agregar iconos más prominentes
-- [ ] Mejorar espaciado y tipografía
-- [ ] Añadir indicador activo más visible
+### 3. Login Preview ✅
+- [x] Diseño AdminLTE standalone
+- [x] Background gradient profesional
+- [x] Inputs y botones AdminLTE
+- [x] Ruta /login-preview para review
 
-### 4. Cards y Contenedores ⏳
-- [ ] Actualizar estilo de stat cards (fondo blanco, bordes sutiles)
-- [ ] Mejorar sombras y espaciado
-- [ ] Agregar iconos de colores en cards de estadísticas
-- [ ] Implementar info-boxes estilo AdminLTE
-
-### 5. Tablas Profesionales ⏳
+### 4. Tablas Profesionales 🔄 (SIGUIENTE)
 - [ ] Rediseñar tabla con estilo AdminLTE (bordes horizontales)
 - [ ] Mejorar header de tabla (fondo gris claro)
 - [ ] Ajustar espaciado de celdas
 - [ ] Mejorar hover state (fondo gris muy claro)
 - [ ] Actualizar badges de estado
-
-### 6. Formularios y Controles ⏳
-- [ ] Actualizar inputs con estilo AdminLTE
-- [ ] Mejorar select dropdowns
-- [ ] Ajustar botones (border-radius más pequeño)
-- [ ] Mejorar estados de focus
-
-### 7. Filtros y Búsqueda ⏳
-- [ ] Rediseñar toolbar de filtros
-- [ ] Mejorar barra de búsqueda
-- [ ] Actualizar select de estados
 - [ ] Mejorar botón de actualizar
 
 ### 8. Paginación ⏳

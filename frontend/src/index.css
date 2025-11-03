@@ -1017,41 +1017,48 @@
   box-shadow: var(--shadow-focus);
 }
 
-/* Improved table styles */
+/* ========================================
+   TABLES ADMINLTE PRO
+   ======================================== */
+
 .table-wrapper {
   overflow-x: auto;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--color-border-muted);
+  border-radius: var(--radius-md);
+  border: 1px solid #dee2e6;
   background: var(--color-surface-default);
+  box-shadow: 0 0 1px rgba(0,0,0,0.125), 0 1px 3px rgba(0,0,0,0.2);
 }
 
 .table-enhanced {
   width: 100%;
   border-collapse: collapse;
+  margin: 0;
 }
 
 .table-enhanced thead {
-  background: var(--color-surface-alt);
-  border-bottom: 2px solid var(--color-border-muted);
+  background: #f8f9fa;
+  border-bottom: 2px solid #dee2e6;
 }
 
 .table-enhanced th {
-  padding: var(--space-3) var(--space-4); /* AdminLTE compacto */
+  padding: 0.75rem;
   text-align: left;
   font-weight: var(--font-weight-semibold);
-  font-size: 0.8125rem; /* 13px */
-  color: var(--color-text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  font-size: 0.875rem;
+  color: #495057;
+  text-transform: none;
+  letter-spacing: 0;
+  vertical-align: middle;
+  border-bottom: 2px solid #dee2e6;
 }
 
 .table-enhanced tbody tr {
-  border-bottom: 1px solid var(--color-border-muted);
-  transition: background-color var(--motion-fast);
+  border-bottom: 1px solid #dee2e6;
+  transition: background-color 0.15s ease-in-out;
 }
 
 .table-enhanced tbody tr:hover {
-  background-color: var(--color-primary-50);
+  background-color: rgba(0,0,0,0.02);
 }
 
 .table-enhanced tbody tr:last-child {
@@ -1059,38 +1066,58 @@
 }
 
 .table-enhanced td {
-  padding: var(--space-3) var(--space-4); /* AdminLTE compacto */
-  font-size: 0.875rem; /* 14px */
+  padding: 0.75rem;
+  font-size: 0.875rem;
   color: var(--color-text-primary);
+  vertical-align: middle;
+  border-top: 1px solid #dee2e6;
 }
 
-/* Badge enhancements */
+.table-enhanced tbody tr:first-child td {
+  border-top: none;
+}
+
+/* Badge AdminLTE PRO */
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: var(--space-2);
-  padding: 0.25rem 0.75rem;
-  border-radius: var(--radius-full);
-  font-size: var(--text-xs);
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  font-size: 0.75rem;
   font-weight: var(--font-weight-semibold);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all var(--motion-fast);
+  letter-spacing: 0.025em;
+  line-height: 1;
+  transition: all 0.15s ease-in-out;
+  min-width: 70px;
 }
 
 .badge-success {
-  background-color: var(--color-success-50);
-  color: var(--color-success-500);
+  background-color: #28a745;
+  color: #ffffff;
 }
 
 .badge-warning {
-  background-color: var(--color-warning-50);
-  color: var(--color-warning-500);
+  background-color: #ffc107;
+  color: #212529;
 }
 
-.badge-error {
-  background-color: var(--color-error-50);
-  color: var(--color-error-500);
+.badge-error,
+.badge-danger {
+  background-color: #dc3545;
+  color: #ffffff;
+}
+
+.badge-info {
+  background-color: #17a2b8;
+  color: #ffffff;
+}
+
+.badge-secondary {
+  background-color: #6c757d;
+  color: #ffffff;
 }
 
 /* Form enhancements */
