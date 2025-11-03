@@ -7,12 +7,14 @@ import { participantesApi } from '@/services/participantes'
 import type { ParticipanteCreate, ParticipanteUpdate } from '@/types/participante'
 import { usePageHeader } from '@/components/PageHeaderContext'
 import { useAuth } from '@/components/AuthProvider'
+import { useNotifications } from '@/contexts/NotificationContext'
 
 export default function NuevoParticipantePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { setHeader, resetHeader } = usePageHeader()
   const { hasPermission } = useAuth()
+  const { addNotification } = useNotifications()
   const canManageParticipantes = hasPermission('participantes:manage')
 
   useEffect(() => {
@@ -29,9 +31,17 @@ export default function NuevoParticipantePage() {
 
   const createMutation = useMutation({
     mutationFn: participantesApi.create,
-    onSuccess: () => {
+    onSuccess: (participante) => {
       queryClient.invalidateQueries({ queryKey: ['participantes'] })
       toast.success('Participante creado correctamente')
+      
+      // Agregar notificación
+      addNotification({
+        type: 'success',
+        title: 'Nuevo Participante',
+        message: `Se ha registrado a ${participante.nombre} ${participante.apellido} exitosamente`,
+      })
+      
       navigate('/participantes')
     },
     onError: (error: any) => {

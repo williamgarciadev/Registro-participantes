@@ -1,8 +1,9 @@
 import { ReactNode, useState, useEffect, useMemo, useCallback, FormEvent, useRef } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Users, Home, Menu, Search, Bell, UserCircle, ChevronDown } from 'lucide-react'
+import { Users, Home, Menu, Search, UserCircle, ChevronDown } from 'lucide-react'
 import PageHeaderContext, { PageHeaderState } from './PageHeaderContext'
 import { useAuth } from './AuthProvider'
+import { NotificationDropdown } from './NotificationDropdown'
 
 interface LayoutProps {
   children?: ReactNode
@@ -193,10 +194,7 @@ export default function Layout({ children }: LayoutProps) {
 
               <div className="dashboard-topbar__actions">
                 {header.actions}
-                <button type="button" className="dashboard-topbar__icon-btn" aria-label="Ver notificaciones">
-                  <Bell className="h-5 w-5" aria-hidden="true" />
-                  <span className="dashboard-topbar__icon-indicator" aria-hidden="true" />
-                </button>
+                <NotificationDropdown />
                 <div ref={userMenuRef} className="dashboard-user-menu-container">
                   <button
                     type="button"

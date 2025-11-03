@@ -40,6 +40,39 @@ Resolver el error CORS y el error 500 en el endpoint de login para que el fronte
 
 ---
 
+# 🔔 Sistema de Notificaciones
+
+## 🎯 Objetivo
+Implementar un sistema de notificaciones en tiempo real que muestre alertas cuando se agreguen nuevos participantes.
+
+## 📋 Tareas
+
+### 1. Crear Infraestructura de Notificaciones ✅
+- [x] Crear NotificationContext con localStorage persistence
+- [x] Crear NotificationDropdown component con badge counter
+- [x] Agregar date-fns para formateo de timestamps relativos
+- [x] Agregar estilos CSS para el sistema de notificaciones
+
+### 2. Integrar en Layout ✅
+- [x] Envolver App con NotificationProvider en main.tsx
+- [x] Reemplazar Bell button estático con NotificationDropdown
+- [x] Verificar que el badge contador funcione correctamente
+
+### 3. Conectar con Creación de Participantes ✅
+- [x] Importar useNotifications en NuevoParticipantePage
+- [x] Agregar addNotification en el onSuccess de la mutación
+- [x] Instalar dependencias npm (date-fns) en el contenedor
+
+### 4. Probar Sistema ⏳
+- [ ] Crear un nuevo participante desde el formulario
+- [ ] Verificar que aparezca el badge con count
+- [ ] Verificar que la notificación se muestre en el dropdown
+- [ ] Verificar persistencia después de recargar página
+- [ ] Probar funcionalidad de marcar como leído
+- [ ] Probar botón de limpiar todas las notificaciones
+
+---
+
 # Plan de Mejoras: Estilo AdminLTE v3
 
 ## 🎯 Objetivo
