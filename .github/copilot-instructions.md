@@ -1,292 +1,833 @@
-# Copilot Instructions - Registro de Participantes
+# Copilot Instructions - Registro de Participantes# Copilot Instructions - Registro de Participantes
 
-> **Sistema de gestión empresarial profesional** construido con AWS Serverless, FastAPI y React  
-> Última actualización: Noviembre 2025
 
----
 
-## 🌐 Idioma y Comunicación
+> **Sistema de gestión empresarial profesional** con AWS Serverless, FastAPI y React  > **Sistema de gestión empresarial profesional** con AWS Serverless, FastAPI y React  
 
-**SIEMPRE responder en español** - Todas las interacciones, código comentado, documentación y explicaciones deben estar en español, manteniendo términos técnicos en inglés cuando sea apropiado.
+> Última actualización: Noviembre 3, 2025> Última actualización: Noviembre 3, 2025
 
-### Estilo de Comunicación
-- **Claro y profesional:** Explicaciones concisas pero completas
-- **Orientado a la acción:** Enfócate en soluciones, no en problemas
-- **Educativo:** Explica el "por qué" detrás de cada decisión técnica
-- **Proactivo:** Sugiere mejoras y optimizaciones cuando sea relevante
 
----
 
-## 🎯 Principios de Desarrollo Core
+## 🌐 Idioma## 🌐 Idioma
 
-### 1. Code Quality Standards
-```yaml
-Código:
-  - Escribir código limpio, legible y bien documentado
-  - Seguir principios SOLID y DRY
-  - Implementar manejo de errores robusto
-  - Usar type hints (Python) y tipos estrictos (TypeScript)
-  
-Testing:
-  - Escribir tests para funcionalidad nueva
-  - Mantener cobertura mínima del 70%
-  - Tests unitarios + integración + E2E
-  
-Performance:
-  - Optimizar queries de DB (usar índices, evitar N+1)
-  - Implementar caching cuando sea apropiado
-  - Lazy loading para componentes pesados
-  - Monitorear cold starts de Lambda
+
+
+**SIEMPRE responder en español** - Código, comentarios, docs y explicaciones en español, términos técnicos en inglés cuando corresponda.**SIEMPRE responder en español** - Código, comentarios, docs y explicaciones en español, términos técnicos en inglés cuando corresponda.
+
+
+
+---## 🏗️ Arquitectura del Sistema
+
+
+
+## 🏗️ Arquitectura del Sistema### Stack Core
+
+- **Backend:** FastAPI + SQLAlchemy 2.0 (async) + asyncpg
+
+### Stack Core- **Lambda Wrapper:** Mangum (convierte ASGI → Lambda handler)
+
+- **Backend:** FastAPI + SQLAlchemy 2.0 (async) + asyncpg- **Database:** PostgreSQL 15 (local Docker) / Aurora Serverless v2 (AWS)
+
+- **Lambda Wrapper:** Mangum (convierte ASGI → Lambda handler)- **Frontend:** React 18 + TypeScript + Vite + React Query v5
+
+- **Database:** PostgreSQL 15 (local Docker) / Aurora Serverless v2 (AWS)- **IaC:** AWS SAM (CloudFormation)
+
+- **Frontend:** React 18 + TypeScript + Vite + React Query v5
+
+- **IaC:** AWS SAM (CloudFormation)### Flujo de Datos Crítico
+
 ```
 
-### 2. Security First Approach
-Antes de cada commit, verificar:
+### Flujo de Datos CríticoAPI Gateway → Lambda (Mangum) → FastAPI → Service Layer → SQLAlchemy (async) → PostgreSQL
 
-- ✅ **Datos sensibles:** Ningún secreto, token o credencial en el código
-- ✅ **Autenticación:** Endpoints protegidos con JWT cuando corresponda
-- ✅ **Validación:** Input sanitization en frontend y backend (defensa en profundidad)
-- ✅ **SQL Injection:** Usar ORM (SQLAlchemy) con parámetros preparados
-- ✅ **XSS Prevention:** Sanitizar HTML, usar Content Security Policy
-- ✅ **CORS:** Configuración estricta solo para dominios permitidos
-- ✅ **Rate Limiting:** Implementado para endpoints públicos
-- ✅ **Environment Variables:** Secretos en AWS Secrets Manager, no en .env
+``````
+
+API Gateway → Lambda (Mangum) → FastAPI → Service Layer → SQLAlchemy (async) → PostgreSQL
+
+```**⚠️ IMPORTANTE:** Todo el backend es async (`async`/`await`). Nunca usar sesiones síncronas de SQLAlchemy.
+
+
+
+**⚠️ IMPORTANTE:** Todo el backend es async (`async`/`await`). Nunca usar sesiones síncronas de SQLAlchemy.## 🎯 Patrones Obligatorios
+
+
+
+---### 1. Service Layer Pattern (Backend)
+
+**SIEMPRE** seguir esta estructura:
+
+## 🎯 Patrones Obligatorios
+
+```python
+
+### 1. Service Layer Pattern (Backend)# backend/src/services/ejemplo_service.py
+
+**SIEMPRE** seguir esta estructura:class EjemploService:
+
+    @staticmethod
+
+```python    async def create_item(db: AsyncSession, data: ItemCreate) -> Item:
+
+# backend/src/services/ejemplo_service.py        """Docstring completo con Args, Returns, Raises."""
+
+class EjemploService:        item = Item(**data.model_dump())
+
+    @staticmethod        db.add(item)
+
+    async def create_item(db: AsyncSession, data: ItemCreate) -> Item:        await db.commit()
+
+        """Docstring completo con Args, Returns, Raises."""        await db.refresh(item)
+
+        item = Item(**data.model_dump())        return item
+
+        db.add(item)```
+
+        await db.commit()
+
+        await db.refresh(item)**Reglas:**
+
+        return item- Todos los métodos son `@staticmethod` con `AsyncSession` como primer parámetro
+
+```- La lógica de negocio vive en services, NO en endpoints
+
+- Docstrings en español estilo Google
+
+**Reglas:**
+
+- Todos los métodos son `@staticmethod` con `AsyncSession` como primer parámetro### 2. Dependency Injection (DB)
+
+- La lógica de negocio vive en services, NO en endpoints```python
+
+- Docstrings en español estilo Google# Endpoints
+
+@router.post("/items")
+
+### 2. Dependency Injection (DB)async def create_item(
+
+```python    data: ItemCreate,
+
+# Endpoints    db: AsyncSession = Depends(get_db)  # ← Inyección
+
+@router.post("/items")):
+
+async def create_item(    return await ItemService.create_item(db, data)
+
+    data: ItemCreate,```
+
+    db: AsyncSession = Depends(get_db)  # ← Inyección
+
+):**❌ NUNCA** crear sesiones manualmente en endpoints.
+
+    return await ItemService.create_item(db, data)
+
+```### 3. Alembic Migrations
+
+**Al modificar modelos SQLAlchemy:**
+
+**❌ NUNCA** crear sesiones manualmente en endpoints.```bash
+
+# Dentro del contenedor backend
+
+### 3. Alembic Migrationsalembic revision --autogenerate -m "descripcion_cambio"
+
+**Al modificar modelos SQLAlchemy:**alembic upgrade head
+
+```bash```
+
+# Dentro del contenedor backend
+
+alembic revision --autogenerate -m "descripcion_cambio"**CRÍTICO:** `backend/alembic/env.py` está configurado para usar `postgresql+asyncpg://` y leer `DATABASE_URL` del entorno.
+
+alembic upgrade head
+
+```### 4. React Query Pattern (Frontend)
+
+```typescript
+
+**CRÍTICO:** `backend/alembic/env.py` está configurado para usar `postgresql+asyncpg://` y leer `DATABASE_URL` del entorno.// Queries GET
+
+const { data, isLoading } = useQuery({
+
+### 4. React Query Pattern (Frontend)  queryKey: ['items', filters],
+
+```typescript  queryFn: () => itemsApi.getAll(filters),
+
+// Queries GET  staleTime: 5 * 60 * 1000
+
+const { data, isLoading } = useQuery({})
+
+  queryKey: ['items', filters],
+
+  queryFn: () => itemsApi.getAll(filters),// Mutations POST/PUT/DELETE con optimistic updates
+
+  staleTime: 5 * 60 * 1000const createMutation = useMutation({
+
+})  mutationFn: itemsApi.create,
+
+  onSuccess: () => {
+
+// Mutations POST/PUT/DELETE con optimistic updates    queryClient.invalidateQueries({ queryKey: ['items'] })
+
+const createMutation = useMutation({    toast.success('Item creado')
+
+  mutationFn: itemsApi.create,  }
+
+  onSuccess: () => {})
+
+    queryClient.invalidateQueries({ queryKey: ['items'] })```
+
+    toast.success('Item creado')
+
+  }## 🔧 Comandos Críticos
+
+})
+
+```### Desarrollo Local (Docker)
+
+```bash
+
+---# Levantar stack completo
+
+make -f Makefile.dev docker-up
+
+## 🔧 Comandos Críticos
+
+# Ver logs
+
+### Desarrollo Local (Docker)make -f Makefile.dev docker-logs-backend
+
+```bash
+
+# Levantar stack completo# Acceder a bash del backend
+
+make -f Makefile.dev docker-upmake -f Makefile.dev docker-bash-backend
+
+
+
+# Ver logs# Aplicar migrations
+
+make -f Makefile.dev docker-logs-backenddocker exec -it registro-participantes-api alembic upgrade head
+
+```
+
+# Acceder a bash del backend
+
+make -f Makefile.dev docker-bash-backend### Testing Manual API
+
+```powershell
+
+# Aplicar migrations# Login
+
+docker exec -it registro-participantes-api alembic upgrade head$response = Invoke-RestMethod -Uri 'http://localhost:8000/api/v1/auth/login/json' `
+
+```  -Method Post -Body (@{email='admin@example.com';password='admin123'} | ConvertTo-Json) `
+
+  -ContentType 'application/json'
+
+### Testing Manual API$token = $response.access_token
+
+```powershell
+
+# Login# Usar token
+
+$response = Invoke-RestMethod -Uri 'http://localhost:8000/api/v1/auth/login/json' `Invoke-RestMethod -Uri 'http://localhost:8000/api/v1/users' `
+
+  -Method Post -Body (@{email='admin@example.com';password='admin123'} | ConvertTo-Json) `  -Headers @{Authorization="Bearer $token"}
+
+  -ContentType 'application/json'```
+
+$token = $response.access_token
+
+## 🔐 Seguridad
+
+# Usar token
+
+Invoke-RestMethod -Uri 'http://localhost:8000/api/v1/users' `### Checklist Antes de Commit
+
+  -Headers @{Authorization="Bearer $token"}- ✅ Sin secretos hardcodeados (usar `backend/.env`)
+
+```- ✅ JWT en endpoints protegidos
+
+- ✅ Pydantic/Zod validation en ambos lados
+
+---- ✅ SQLAlchemy parámetros preparados (automático con ORM)
+
+- ✅ CORS configurado en `backend/src/main.py`
+
+## 🔐 Seguridad
+
+### Pattern de Autenticación
+
+### Checklist Antes de Commit```python
+
+- ✅ Sin secretos hardcodeados (usar `backend/.env`)# Endpoint protegido
+
+- ✅ JWT en endpoints protegidosfrom src.core.security import get_current_user
+
+- ✅ Pydantic/Zod validation en ambos lados
+
+- ✅ SQLAlchemy parámetros preparados (automático con ORM)@router.get("/protected")
+
+- ✅ CORS configurado en `backend/src/main.py`async def protected_route(
+
+    current_user: User = Depends(get_current_user)
+
+### Pattern de Autenticación):
+
+```python    return {"user_id": current_user.id}
+
+# Endpoint protegido```
+
+from src.core.security import get_current_user
+
+## 📁 Estructura de Archivos
+
+@router.get("/protected")
+
+async def protected_route(---
+
+    current_user: User = Depends(get_current_user)
+
+):## 🎯 Principios de Desarrollo Core
+
+    return {"user_id": current_user.id}
+
+```### 1. Code Quality Standards
+
+```yaml
+
+---Código:
+
+  - Escribir código limpio, legible y bien documentado
+
+## 📁 Estructura de Archivos  - Seguir principios SOLID y DRY
+
+  - Implementar manejo de errores robusto
+
+```  - Usar type hints (Python) y tipos estrictos (TypeScript)
+
+backend/src/  
+
+├── api/v1/endpoints/       # Controllers (thin layer)Testing:
+
+│   ├── auth/router.py      # Login, password reset  - Escribir tests para funcionalidad nueva
+
+│   ├── participantes.py  - Mantener cobertura mínima del 70%
+
+│   └── users.py  - Tests unitarios + integración + E2E
+
+├── models/                 # SQLAlchemy ORM models  
+
+│   ├── participante.pyPerformance:
+
+│   ├── user.py  - Optimizar queries de DB (usar índices, evitar N+1)
+
+│   └── password_reset.py  - Implementar caching cuando sea apropiado
+
+├── schemas/                # Pydantic schemas  - Lazy loading para componentes pesados
+
+│   ├── participante.py  - Monitorear cold starts de Lambda
+
+│   └── auth/```
+
+│       └── password_reset.py
+
+├── services/               # Business logic### 2. Security First Approach
+
+│   ├── participante_service.pyAntes de cada commit, verificar:
+
+│   ├── password_reset_service.py
+
+│   └── email_service.py- ✅ **Datos sensibles:** Ningún secreto, token o credencial en el código
+
+├── core/                   # Core functionality- ✅ **Autenticación:** Endpoints protegidos con JWT cuando corresponda
+
+│   ├── config.py           # Settings (Pydantic)- ✅ **Validación:** Input sanitization en frontend y backend (defensa en profundidad)
+
+│   └── security.py         # JWT, password hashing- ✅ **SQL Injection:** Usar ORM (SQLAlchemy) con parámetros preparados
+
+├── database/- ✅ **XSS Prevention:** Sanitizar HTML, usar Content Security Policy
+
+│   └── session.py          # AsyncSession factory- ✅ **CORS:** Configuración estricta solo para dominios permitidos
+
+└── main.py                 # FastAPI app + Lambda handler- ✅ **Rate Limiting:** Implementado para endpoints públicos
+
+```- ✅ **Environment Variables:** Secretos en AWS Secrets Manager, no en .env
+
 - ✅ **Dependencies:** Auditar regularmente con `npm audit` y `pip-audit`
 
-### 3. Workflow Metodológico
-
-```mermaid
-graph LR
-    A[📋 Analizar Request] --> B[📝 Plan en todo.md]
-    B --> C[✋ Esperar Aprobación]
-    C --> D[⚡ Implementar]
-    D --> E[🧪 Testing]
-    E --> F[📚 Documentar]
-    F --> G[💾 Commit + Push]
-    G --> H[🎉 Explicar Cambios]
 ```
 
-#### Paso a Paso Detallado
+frontend/src/### 3. Workflow Metodológico
+
+├── components/             # Shared components
+
+│   └── Layout/```mermaid
+
+├── pages/                  # Route componentsgraph LR
+
+│   ├── LoginPage.tsx    A[📋 Analizar Request] --> B[📝 Plan en todo.md]
+
+│   ├── ForgotPasswordPage.tsx    B --> C[✋ Esperar Aprobación]
+
+│   └── ResetPasswordPage.tsx    C --> D[⚡ Implementar]
+
+├── services/               # API clients    D --> E[🧪 Testing]
+
+│   ├── api.ts              # Axios instance config    E --> F[📚 Documentar]
+
+│   └── auth.ts    F --> G[💾 Commit + Push]
+
+├── types/                  # TypeScript types    G --> H[🎉 Explicar Cambios]
+
+├── contexts/               # React contexts```
+
+│   └── AuthContext.tsx
+
+└── App.tsx                 # Router setup#### Paso a Paso Detallado
+
+```
 
 **1. Análisis Inicial (5-10 min)**
-- Leer el request completo
+
+---- Leer el request completo
+
 - Buscar archivos relevantes con `grep_search` o `semantic_search`
-- Identificar dependencias y posibles side-effects
+
+## 🚀 Workflows de Desarrollo- Identificar dependencias y posibles side-effects
+
 - Crear checklist en `tasks/todo.md`
 
-**2. Plan Detallado**
-```markdown
-## [Título de la Tarea]
+### Desarrollo Local
 
-### Objetivo
+**2. Plan Detallado**
+
+**Inicio Rápido:**```markdown
+
+```powershell## [Título de la Tarea]
+
+# 1. Levantar stack completo
+
+make -f Makefile.dev docker-up### Objetivo
+
 [Descripción clara del resultado esperado]
 
-### Archivos a Modificar
-- [ ] `backend/src/api/v1/endpoints/ejemplo.py` - Agregar endpoint
-- [ ] `frontend/src/pages/EjemploPage.tsx` - Crear UI
-- [ ] `backend/tests/test_ejemplo.py` - Tests unitarios
+# ✅ Backend: http://localhost:8000
 
-### Checklist Técnico
-- [ ] Validación de input (Pydantic/Zod)
+# ✅ Docs: http://localhost:8000/docs### Archivos a Modificar
+
+# ✅ Database: localhost:5432- [ ] `backend/src/api/v1/endpoints/ejemplo.py` - Agregar endpoint
+
+- [ ] `frontend/src/pages/EjemploPage.tsx` - Crear UI
+
+# 2. Frontend (en terminal separado)- [ ] `backend/tests/test_ejemplo.py` - Tests unitarios
+
+cd frontend
+
+npm install### Checklist Técnico
+
+npm run dev- [ ] Validación de input (Pydantic/Zod)
+
 - [ ] Manejo de errores
-- [ ] Logging apropiado
-- [ ] Tests escritos
+
+# ✅ Frontend: http://localhost:5173- [ ] Logging apropiado
+
+```- [ ] Tests escritos
+
 - [ ] Documentación actualizada
 
-### Riesgos/Consideraciones
-- Puede afectar el rendimiento si hay muchos registros
+**Hot Reload:**
+
+- Backend: Uvicorn con `--reload` (cambios Python se recargan automáticamente)### Riesgos/Consideraciones
+
+- Frontend: Vite HMR (Hot Module Replacement)- Puede afectar el rendimiento si hay muchos registros
+
 - Requiere migración de DB
-```
 
-**3. Aprobación del Usuario**
-> 🛑 **CRITICAL:** NO ejecutar cambios sin aprobación explícita del usuario
+### Testing```
 
-**4. Implementación Incremental**
-- Un cambio a la vez
+
+
+**Backend:****3. Aprobación del Usuario**
+
+```powershell> 🛑 **CRITICAL:** NO ejecutar cambios sin aprobación explícita del usuario
+
+pytest tests/unit -v
+
+pytest --cov=src --cov-report=html**4. Implementación Incremental**
+
+```- Un cambio a la vez
+
 - Commits pequeños y atómicos
-- Probar después de cada cambio significativo
-- Marcar tareas como completadas en `todo.md`
 
-**5. Testing Riguroso**
-```bash
-# Backend
-pytest tests/test_ejemplo.py -v --cov
+**Frontend:**- Probar después de cada cambio significativo
 
-# Frontend
+```powershell- Marcar tareas como completadas en `todo.md`
+
 npm run test:unit
-npm run test:e2e
 
-# Integration
+npm run test:e2e**5. Testing Riguroso**
+
+``````bash
+
+# Backend
+
+### Deploymentpytest tests/test_ejemplo.py -v --cov
+
+
+
+**Backend (AWS SAM):**# Frontend
+
+```powershellnpm run test:unit
+
+sam build --use-containernpm run test:e2e
+
+sam deploy --guided
+
+```# Integration
+
 curl -X POST http://localhost:8000/api/v1/ejemplo -H "Content-Type: application/json"
-```
 
-**6. Documentación Actualizada**
-- Comentarios en código complejo
-- Actualizar `docs/API.md` si hay nuevos endpoints
+**Frontend (S3 + CloudFront):**```
+
+```powershell
+
+npm run build**6. Documentación Actualizada**
+
+aws s3 sync dist/ s3://bucket/ --delete- Comentarios en código complejo
+
+```- Actualizar `docs/API.md` si hay nuevos endpoints
+
 - Agregar ejemplos de uso
-- Registrar decisiones arquitectónicas importantes
 
-**7. Control de Versiones**
+---- Registrar decisiones arquitectónicas importantes
+
+
+
+## 🐛 Common Pitfalls**7. Control de Versiones**
+
 ```bash
-# Commit message format: tipo(scope): descripción corta
 
-git commit -m "feat(participantes): agregar filtro por fecha de inscripción"
-git commit -m "fix(auth): corregir validación de token expirado"
-git commit -m "docs(api): actualizar documentación de endpoints"
+### 1. CORS Errors# Commit message format: tipo(scope): descripción corta
 
-# Tipos: feat, fix, docs, style, refactor, test, chore
+**Solución:** Configurar orígenes permitidos en `backend/src/core/config.py`
+
+```pythongit commit -m "feat(participantes): agregar filtro por fecha de inscripción"
+
+CORS_ORIGINS: list[str] = [git commit -m "fix(auth): corregir validación de token expirado"
+
+    "http://localhost:5173",git commit -m "docs(api): actualizar documentación de endpoints"
+
+    "https://app.example.com"
+
+]# Tipos: feat, fix, docs, style, refactor, test, chore
+
+``````
+
+
+
+### 2. Frontend Env Vars**8. Explicación Post-Implementación**
+
+**Solución:** Usar prefijo `VITE_````markdown
+
+```bash## ✅ Cambios Implementados
+
+# ✅ BIEN
+
+VITE_API_URL=https://api.example.com### 🎯 Objetivo Alcanzado
+
+```[Descripción del resultado]
+
+
+
+### 3. Lambda Cold Starts### 📁 Archivos Modificados
+
+**Solución:** Aumentar memoria en `template.yaml`1. **backend/src/api/v1/endpoints/participantes.py** (líneas 45-67)
+
+```yaml   - Agregado endpoint GET /api/v1/participantes/stats
+
+MemorySize: 512  # ← Aumentar de 128 a 512 MB   - Retorna estadísticas agregadas de participantes
+
 ```
-
-**8. Explicación Post-Implementación**
-```markdown
-## ✅ Cambios Implementados
-
-### 🎯 Objetivo Alcanzado
-[Descripción del resultado]
-
-### 📁 Archivos Modificados
-1. **backend/src/api/v1/endpoints/participantes.py** (líneas 45-67)
-   - Agregado endpoint GET /api/v1/participantes/stats
-   - Retorna estadísticas agregadas de participantes
 
 2. **frontend/src/pages/DashboardPage.tsx** (líneas 12-89)
-   - Integrado componente StatsCards
+
+---   - Integrado componente StatsCards
+
    - Consume nuevo endpoint de estadísticas
 
-### 🔄 Flujo de Funcionamiento
-1. Usuario accede al Dashboard
-2. React Query hace fetch a /api/v1/participantes/stats
-3. Lambda procesa request y consulta Aurora
-4. Aurora ejecuta query agregado con GROUP BY
-5. Respuesta se cachea por 5 minutos
-6. Frontend renderiza cards con animaciones
+## 💡 Convenciones Específicas
 
-### 💡 Decisiones Técnicas
-- **Por qué Redis Cache:** Reducir carga en Aurora para queries frecuentes
-- **Por qué React Query:** Manejo automático de cache y revalidación
+### 🔄 Flujo de Funcionamiento
+
+### Naming Conventions1. Usuario accede al Dashboard
+
+2. React Query hace fetch a /api/v1/participantes/stats
+
+**Python:**3. Lambda procesa request y consulta Aurora
+
+```python4. Aurora ejecuta query agregado con GROUP BY
+
+# snake_case para variables/funciones5. Respuesta se cachea por 5 minutos
+
+user_email = "test@example.com"6. Frontend renderiza cards con animaciones
+
+
+
+# PascalCase para classes### 💡 Decisiones Técnicas
+
+class ParticipanteService:- **Por qué Redis Cache:** Reducir carga en Aurora para queries frecuentes
+
+    pass- **Por qué React Query:** Manejo automático de cache y revalidación
+
 - **Por qué animaciones:** Mejorar UX y percepción de velocidad
 
-### 🧪 Testing Realizado
-- ✅ Tests unitarios (8 casos)
+# UPPER_SNAKE_CASE para constants
+
+MAX_ITEMS_PER_PAGE = 100### 🧪 Testing Realizado
+
+```- ✅ Tests unitarios (8 casos)
+
 - ✅ Tests de integración (3 escenarios)
-- ✅ Validación manual en localhost
-- ✅ Performance test (50 req/s sin degradación)
 
-### ⚠️ Impacto en Sistema
+**TypeScript:**- ✅ Validación manual en localhost
+
+```typescript- ✅ Performance test (50 req/s sin degradación)
+
+// camelCase para variables/funciones
+
+const userName = "John"### ⚠️ Impacto en Sistema
+
 - **Positivo:** Dashboard 3x más rápido
-- **Consideraciones:** Cache invalidación cuando se crea nuevo participante
-- **Monitoreo:** Revisar métricas de Lambda en 24h
-```
 
----
+// PascalCase para types/interfaces/components- **Consideraciones:** Cache invalidación cuando se crea nuevo participante
 
----
+interface UserData {}- **Monitoreo:** Revisar métricas de Lambda en 24h
 
-## 🏗️ Arquitectura del Sistema
+function UserCard() {}```
 
-### Stack Tecnológico
 
-```yaml
-Backend:
-  Runtime: Python 3.11 (AWS Lambda)
-  Framework: FastAPI 0.104+
-  ORM: SQLAlchemy 2.0 (Async)
-  Validation: Pydantic v2
-  Database Driver: asyncpg
-  
-Frontend:
-  Runtime: React 18 + TypeScript 5
-  Build Tool: Vite 5
-  State Management: React Query v5 (TanStack)
-  Forms: React Hook Form + Zod
-  UI: Tailwind CSS + Lucide Icons
-  Testing: Playwright + Vitest
-  
-Infrastructure:
-  IaC: AWS SAM (CloudFormation)
-  Compute: Lambda (512MB memory)
-  API: API Gateway HTTP API
-  Database: Aurora Serverless v2 (PostgreSQL 15)
-  Storage: S3 (frontend assets)
-  CDN: CloudFront
-  Secrets: AWS Secrets Manager
-  Monitoring: CloudWatch + X-Ray
-  
-Development:
-  Containerization: Docker + Docker Compose
-  Local DB: PostgreSQL 15 (Docker)
-  Package Managers: pip + npm
-```
 
-### Arquitectura de Capas
+// UPPER_SNAKE_CASE para constants---
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      CloudFront (CDN)                        │
-│                    S3 Bucket (Frontend)                      │
-└─────────────────────────────────────────────────────────────┘
-                              ▲
-                              │ HTTPS
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    API Gateway HTTP API                      │
-│                    /api/* → Lambda Proxy                     │
-└─────────────────────────────────────────────────────────────┘
-                              ▲
-                              │ Invoke
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│                      Lambda Function                         │
-│  ┌──────────────────────────────────────────────────────┐  │
-│  │           FastAPI App (via Mangum)                    │  │
-│  │  ┌────────────────────────────────────────────────┐  │  │
-│  │  │  Controllers (api/v1/endpoints/)                │  │  │
-│  │  │         ↓                                       │  │  │
-│  │  │  Services (services/) ← Business Logic         │  │  │
-│  │  │         ↓                                       │  │  │
-│  │  │  Models (models/) ← SQLAlchemy ORM             │  │  │
-│  │  └────────────────────────────────────────────────┘  │  │
-│  └──────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                              ▲
-                              │ asyncpg
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│           Aurora Serverless v2 (PostgreSQL)                  │
-│                     Min: 0.5 ACU                            │
-└─────────────────────────────────────────────────────────────┘
-```
+const API_BASE_URL = "https://api.example.com"
 
-### Decisiones Arquitectónicas Clave
+```---
 
-#### 1. Lambda + Mangum Wrapper
-**Decisión:** Usar `mangum` para convertir FastAPI (ASGI) en manejador Lambda
+
+
+### Error Handling## 🏗️ Arquitectura del Sistema
+
+
+
+**Backend:**### Stack Tecnológico
+
 ```python
-# backend/src/main.py
-from mangum import Mangum
+
+# ✅ Excepciones específicas con contexto```yaml
+
+raise HTTPException(Backend:
+
+    status_code=status.HTTP_404_NOT_FOUND,  Runtime: Python 3.11 (AWS Lambda)
+
+    detail=f"Participante con email '{email}' no encontrado"  Framework: FastAPI 0.104+
+
+)  ORM: SQLAlchemy 2.0 (Async)
+
+```  Validation: Pydantic v2
+
+  Database Driver: asyncpg
+
+**Frontend:**  
+
+```typescriptFrontend:
+
+// ✅ Error handling con React Query + Toast  Runtime: React 18 + TypeScript 5
+
+const mutation = useMutation({  Build Tool: Vite 5
+
+  onError: (error: AxiosError) => {  State Management: React Query v5 (TanStack)
+
+    toast.error(error.response?.data?.detail || 'Error')  Forms: React Hook Form + Zod
+
+  }  UI: Tailwind CSS + Lucide Icons
+
+})  Testing: Playwright + Vitest
+
+```  
+
+Infrastructure:
+
+### Logging  IaC: AWS SAM (CloudFormation)
+
+  Compute: Lambda (512MB memory)
+
+**Backend:**  API: API Gateway HTTP API
+
+```python  Database: Aurora Serverless v2 (PostgreSQL 15)
+
+from aws_lambda_powertools import Logger  Storage: S3 (frontend assets)
+
+  CDN: CloudFront
+
+logger = Logger(service="api")  Secrets: AWS Secrets Manager
+
+logger.info("Creating item", extra={"email": data.email})  Monitoring: CloudWatch + X-Ray
+
+```  
+
+Development:
+
+---  Containerization: Docker + Docker Compose
+
+  Local DB: PostgreSQL 15 (Docker)
+
+## 🎯 Workflow Metodológico  Package Managers: pip + npm
+
+```
+
+**1. Análisis** (5-10 min)
+
+- Leer request completo### Arquitectura de Capas
+
+- Buscar archivos relevantes
+
+- Crear checklist en `tasks/todo.md````
+
+┌─────────────────────────────────────────────────────────────┐
+
+**2. Plan**│                      CloudFront (CDN)                        │
+
+- Escribir plan detallado en markdown│                    S3 Bucket (Frontend)                      │
+
+- Identificar archivos a modificar└─────────────────────────────────────────────────────────────┘
+
+- Listar riesgos/consideraciones                              ▲
+
+                              │ HTTPS
+
+**3. Aprobación**                              ▼
+
+> 🛑 NO ejecutar cambios sin aprobación del usuario┌─────────────────────────────────────────────────────────────┐
+
+│                    API Gateway HTTP API                      │
+
+**4. Implementación**│                    /api/* → Lambda Proxy                     │
+
+- Cambios pequeños y atómicos└─────────────────────────────────────────────────────────────┘
+
+- Probar después de cada cambio                              ▲
+
+- Commits descriptivos                              │ Invoke
+
+                              ▼
+
+**5. Testing**┌─────────────────────────────────────────────────────────────┐
+
+```bash│                      Lambda Function                         │
+
+pytest -v│  ┌──────────────────────────────────────────────────────┐  │
+
+npm run test:unit│  │           FastAPI App (via Mangum)                    │  │
+
+```│  │  ┌────────────────────────────────────────────────┐  │  │
+
+│  │  │  Controllers (api/v1/endpoints/)                │  │  │
+
+**6. Documentación**│  │  │         ↓                                       │  │  │
+
+- Actualizar docs relevantes│  │  │  Services (services/) ← Business Logic         │  │  │
+
+- Comentarios en código complejo│  │  │         ↓                                       │  │  │
+
+│  │  │  Models (models/) ← SQLAlchemy ORM             │  │  │
+
+**7. Commit**│  │  └────────────────────────────────────────────────┘  │  │
+
+```bash│  └──────────────────────────────────────────────────────┘  │
+
+git commit -m "feat(scope): descripción"└─────────────────────────────────────────────────────────────┘
+
+```                              ▲
+
+                              │ asyncpg
+
+---                              ▼
+
+┌─────────────────────────────────────────────────────────────┐
+
+## 🔑 Puntos Clave│           Aurora Serverless v2 (PostgreSQL)                  │
+
+│                     Min: 0.5 ACU                            │
+
+1. **Todo es async** en backend - usar `await` para DB└─────────────────────────────────────────────────────────────┘
+
+2. **Service Layer obligatorio** - nunca lógica en endpoints```
+
+3. **Dependency Injection** - `db: AsyncSession = Depends(get_db)`
+
+4. **React Query** para server state - cache, optimistic updates### Decisiones Arquitectónicas Clave
+
+5. **Alembic migrations** - siempre al modificar modelos
+
+6. **Mangum wrapper** - convierte FastAPI para Lambda#### 1. Lambda + Mangum Wrapper
+
+7. **JWT authentication** - `get_current_user` para endpoints protegidos**Decisión:** Usar `mangum` para convertir FastAPI (ASGI) en manejador Lambda
+
+8. **Environment variables** - `VITE_` prefix en frontend```python
+
+9. **Español en código** - comentarios y mensajes en español# backend/src/main.py
+
+10. **Security first** - validar en ambos ladosfrom mangum import Mangum
+
 from fastapi import FastAPI
 
+---
+
 app = FastAPI()
-# ... routes ...
 
-# Handler para Lambda
-handler = Mangum(app, lifespan="off")
-```
+## 📚 Documentación de Referencia# ... routes ...
 
-**Razones:**
-- ✅ FastAPI no es nativamente compatible con Lambda
-- ✅ Mangum maneja la conversión de eventos API Gateway
+
+
+**Para empezar:**# Handler para Lambda
+
+- `DOCUMENTACION/COMIENZA_AQUI.md` - Setup inicialhandler = Mangum(app, lifespan="off")
+
+- `docs/DEVELOPMENT.md` - Desarrollo local```
+
+
+
+**Para deployment:****Razones:**
+
+- `deploy-docs/AWS_DEPLOYMENT_OVERVIEW.md` - Arquitectura AWS- ✅ FastAPI no es nativamente compatible con Lambda
+
+- `deploy-docs/AWS_QUICK_COMMANDS.md` - Comandos rápidos- ✅ Mangum maneja la conversión de eventos API Gateway
+
 - ✅ Permite desarrollo local con Uvicorn sin cambios
-- ⚠️ Cold starts: primera request ~500ms, posteriores ~50ms
+
+**Para troubleshooting:**- ⚠️ Cold starts: primera request ~500ms, posteriores ~50ms
+
+- `troubleshooting/` - Soluciones a errores comunes
 
 #### 2. Service Layer Pattern
-**Decisión:** Separar lógica de negocio de controladores
 
-**Estructura:**
+**API:****Decisión:** Separar lógica de negocio de controladores
+
+- `docs/API.md` - Documentación de endpoints
+
+- `http://localhost:8000/docs` - Swagger interactivo (local)**Estructura:**
+
 ```
-Controller → Valida request/response (Pydantic schemas)
+
+---Controller → Valida request/response (Pydantic schemas)
+
     ↓
-Service → Lógica de negocio (transacciones, reglas)
-    ↓
+
+**Última actualización:** Noviembre 3, 2025  Service → Lógica de negocio (transacciones, reglas)
+
+**Versión:** 2.0.0    ↓
+
 Model → Acceso a datos (SQLAlchemy ORM)
 ```
 
