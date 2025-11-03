@@ -23,8 +23,8 @@ export default function LoginPage() {
       const destination = from && from !== '/login' ? from : '/'
       navigate(destination, { replace: true })
     } catch (error) {
-      console.error('Error al iniciar sesión', error)
-      toast.error('No fue posible iniciar sesión con las credenciales proporcionadas')
+      console.error('Error al iniciar sesion', error)
+      toast.error('No fue posible iniciar sesion con las credenciales proporcionadas')
     }
   }
 
@@ -32,19 +32,21 @@ export default function LoginPage() {
     <div className="auth-page">
       <div className="auth-card" role="dialog" aria-labelledby="login-title">
         <div className="auth-card__header">
-          <LogIn className="h-8 w-8 text-primary-500" aria-hidden="true" />
+          <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary-100">
+            <LogIn className="h-8 w-8 text-primary-600" aria-hidden="true" />
+          </div>
           <div>
             <h1 id="login-title" className="auth-card__title">
-              Acceso al panel
+              Registro de Participantes
             </h1>
-            <p className="auth-card__subtitle">Ingresa tus credenciales para continuar</p>
+            <p className="auth-card__subtitle">Ingresa tus credenciales para acceder al panel</p>
           </div>
         </div>
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <div className="form-field">
             <label htmlFor="email" className="form-label">
-              Correo
+              Correo electronico
             </label>
             <input
               id="email"
@@ -54,13 +56,13 @@ export default function LoginPage() {
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               className="form-input"
-              placeholder="admin@demo.local"
+              placeholder="tu.email@ejemplo.com"
             />
           </div>
 
           <div className="form-field">
             <label htmlFor="password" className="form-label">
-              Contraseña
+              Contrasena
             </label>
             <input
               id="password"
@@ -74,19 +76,35 @@ export default function LoginPage() {
             />
           </div>
 
-          <button type="submit" className="btn btn-primary w-full justify-center" disabled={isAuthenticating}>
-            {isAuthenticating ? 'Verificando...' : 'Ingresar'}
+          <button 
+            type="submit" 
+            className="btn btn-primary w-full justify-center" 
+            disabled={isAuthenticating}
+            style={{ marginTop: '0.5rem' }}
+          >
+            {isAuthenticating ? (
+              <>
+                <span className="spinner" style={{ width: '1rem', height: '1rem', borderWidth: '2px' }} aria-hidden="true"></span>
+                Verificando...
+              </>
+            ) : (
+              <>
+                <LogIn className="h-4 w-4" aria-hidden="true" />
+                Iniciar Sesion
+              </>
+            )}
           </button>
         </form>
 
         <p className="auth-card__hint">
-          ¿Necesitas acceso? Ponte en contacto con un administrador del sistema.
+          ¿Necesitas acceso? Contacta con el administrador del sistema
         </p>
 
         <Link to="/" className="auth-card__link">
-          Volver al sitio
+          ← Volver al inicio
         </Link>
       </div>
     </div>
   )
 }
+

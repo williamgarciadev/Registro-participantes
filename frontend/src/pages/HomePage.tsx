@@ -2,26 +2,30 @@ import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Users, Plus, Search, ShieldCheck, Sparkles } from 'lucide-react'
 import { usePageHeader } from '@/components/PageHeaderContext'
+import { useAuth } from '@/components/AuthProvider'
 
 export default function HomePage() {
   const { setHeader, resetHeader } = usePageHeader()
+  const { hasPermission } = useAuth()
+  const canManageParticipantes = hasPermission('participantes:manage')
+  const canViewParticipantes = hasPermission('participantes:view')
 
   useEffect(() => {
     setHeader({
       title: 'Panel principal',
       subtitle: 'Resumen general del sistema',
-      actions: (
+      actions: canManageParticipantes ? (
         <Link to="/participantes/nuevo" className="btn btn-primary hidden sm:inline-flex">
           <Plus className="h-4 w-4" aria-hidden="true" />
           Registrar participante
         </Link>
-      ),
+      ) : null,
     })
 
     return () => {
       resetHeader()
     }
-  }, [resetHeader, setHeader])
+  }, [canManageParticipantes, resetHeader, setHeader])
 
   return (
     <div className="space-y-6 pb-8">
@@ -37,10 +41,16 @@ export default function HomePage() {
               serverless en AWS.
             </p>
           </div>
-          <Link to="/participantes" className="btn btn-secondary group">
-            <Users className="h-4 w-4 transition-transform group-hover:scale-110" aria-hidden="true" />
-            Ver participantes
-          </Link>
+          {canViewParticipantes ? (
+            <Link to="/participantes" className="btn btn-secondary group">
+              <Users className="h-4 w-4 transition-transform group-hover:scale-110" aria-hidden="true" />
+              Ver participantes
+            </Link>
+          ) : (
+            <span className="text-sm text-secondary">
+              Solicita acceso para visualizar el modulo de participantes.
+            </span>
+          )}
         </div>
       </section>
 

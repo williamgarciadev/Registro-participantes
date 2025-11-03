@@ -6,16 +6,19 @@ import ParticipanteForm from '@/components/ParticipanteForm'
 import { participantesApi } from '@/services/participantes'
 import type { ParticipanteUpdate } from '@/types/participante'
 import { usePageHeader } from '@/components/PageHeaderContext'
+import { useAuth } from '@/components/AuthProvider'
 
 export default function EditarParticipantePage() {
   const { id } = useParams<{ id: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { hasPermission } = useAuth()
+  const canManageParticipantes = hasPermission('participantes:manage')
 
   const { data: participante, isLoading, refetch } = useQuery({
     queryKey: ['participante', id],
     queryFn: () => participantesApi.getById(id!),
-    enabled: !!id,
+    enabled: canManageParticipantes && !!id,
   })
 
   useEffect(() => {
@@ -55,6 +58,24 @@ export default function EditarParticipantePage() {
 
   const handleSubmit = (data: ParticipanteUpdate) => {
     updateMutation.mutate(data)
+  }
+
+  if (!canManageParticipantes) {
+    return (
+      <div className="mx-auto max-w-3xl space-y-6">
+        <div className="mb-8">
+          <h1 className="heading-1">Editar participante</h1>
+          <p className="text-secondary mt-1">Necesitas permisos de edicion para actualizar participantes.</p>
+        </div>
+
+        <div className="card p-6 text-center">
+          <h2 className="text-lg font-semibold text-text-primary">Acceso restringido</h2>
+          <p className="mt-2 text-sm text-secondary">
+            Solicita al administrador que te otorgue el permiso participantes:manage.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   if (isLoading) {

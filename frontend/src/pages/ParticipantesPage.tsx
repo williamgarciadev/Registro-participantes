@@ -6,6 +6,7 @@ import { Plus, Search, Edit, Trash2, RefreshCw, X, Users, ListFilter, Hash } fro
 import { participantesApi } from '@/services/participantes'
 import type { EstadoParticipante } from '@/types/participante'
 import { usePageHeader } from '@/components/PageHeaderContext'
+import { useAuth } from '@/components/AuthProvider'
 
 export default function ParticipantesPage() {
   const PAGE_SIZE_OPTIONS = [10, 25, 50] as const
@@ -17,23 +18,27 @@ export default function ParticipantesPage() {
   const cancelButtonRef = useRef<HTMLButtonElement | null>(null)
   const queryClient = useQueryClient()
   const { setHeader, resetHeader } = usePageHeader()
+  const { hasPermission } = useAuth()
+
+  const canManageParticipantes = hasPermission('participantes:manage')
+  const canViewParticipantes = hasPermission('participantes:view')
 
   useEffect(() => {
     setHeader({
       title: 'Participantes',
-      subtitle: 'Gestión de inscripciones y asistencia',
-      actions: (
+      subtitle: 'Gestion de inscripciones y asistencia',
+      actions: canManageParticipantes ? (
         <Link to="/participantes/nuevo" className="btn btn-primary hidden sm:inline-flex">
           <Plus className="h-4 w-4" aria-hidden="true" />
           Registrar participante
         </Link>
-      ),
+      ) : null,
     })
 
     return () => {
       resetHeader()
     }
-  }, [resetHeader, setHeader])
+  }, [canManageParticipantes, resetHeader, setHeader])
 
   useEffect(() => {
     if (deleteModal) {
@@ -65,6 +70,7 @@ export default function ParticipantesPage() {
         skip: page * pageSize,
         limit: pageSize,
       }),
+    enabled: canViewParticipantes,
   })
 
   const {
@@ -81,7 +87,7 @@ export default function ParticipantesPage() {
         skip: page * pageSize,
         limit: pageSize,
       }),
-    enabled: searchQuery.length > 0,
+    enabled: canViewParticipantes && searchQuery.length > 0,
   })
 
   const activeData = searchQuery.length > 0 ? searchData : data
@@ -144,9 +150,37 @@ export default function ParticipantesPage() {
     }
   }
 
+  if (!canViewParticipantes) {
+    return (
+      <div className="space-y-4 pb-8">
+        <nav className="flex items-center gap-2 text-sm text-tertiary" aria-label="Ruta de navegacion">
+          <Link to="/" className="transition-colors hover:text-primary-600">
+            Panel
+          </Link>
+          <span aria-hidden="true">/</span>
+          <span className="text-secondary">Participantes</span>
+        </nav>
+
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h1 className="heading-1">Participantes</h1>
+            <p className="text-secondary mt-0.5">No tienes permisos para visualizar esta seccion.</p>
+          </div>
+        </div>
+
+        <div className="card p-6 text-center">
+          <h2 className="text-lg font-semibold text-text-primary">Acceso restringido</h2>
+          <p className="mt-2 text-sm text-secondary">
+            Solicita a un administrador los permisos de visualizacion para operar con participantes.
+          </p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="space-y-4 pb-8">
-      <nav className="flex items-center gap-2 text-sm text-tertiary" aria-label="Ruta de navegación">
+      <nav className="flex items-center gap-2 text-sm text-tertiary" aria-label="Ruta de navegacion">
         <Link to="/" className="transition-colors hover:text-primary-600">
           Panel
         </Link>
@@ -163,10 +197,12 @@ export default function ParticipantesPage() {
               : 'Cargando...'}
           </p>
         </div>
-        <Link to="/participantes/nuevo" className="btn btn-primary sm:hidden">
-          <Plus className="h-5 w-5" aria-hidden="true" />
-          <span>Nuevo participante</span>
-        </Link>
+        {canManageParticipantes && (
+          <Link to="/participantes/nuevo" className="btn btn-primary sm:hidden">
+            <Plus className="h-5 w-5" aria-hidden="true" />
+            <span>Nuevo participante</span>
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
@@ -197,7 +233,7 @@ export default function ParticipantesPage() {
             </span>
           </div>
           <p className="mt-3 text-xs text-tertiary">
-            Página {totalPages === 0 ? 1 : page + 1} de {Math.max(totalPages, 1)}
+            Pagina {totalPages === 0 ? 1 : page + 1} de {Math.max(totalPages, 1)}
           </p>
         </div>
 
@@ -214,7 +250,7 @@ export default function ParticipantesPage() {
             </span>
           </div>
           <p className="mt-3 text-xs text-tertiary">
-            Mostrando {participantes.length} registro{participantes.length !== 1 ? 's' : ''} en esta página
+            Mostrando {participantes.length} registro{participantes.length !== 1 ? 's' : ''} en esta pagina
           </p>
         </div>
       </div>
@@ -232,10 +268,10 @@ export default function ParticipantesPage() {
                 setPage(0)
               }}
               className="input filters-toolbar__search-field"
-              aria-label="Campo de búsqueda de participantes"
+              aria-label="Campo de busqueda de participantes"
             />
           </div>
-          <button type="submit" className="btn btn-primary filters-toolbar__search-button" aria-label="Ejecutar búsqueda">
+          <button type="submit" className="btn btn-primary filters-toolbar__search-button" aria-label="Ejecutar busqueda">
             Buscar
           </button>
         </form>
@@ -290,7 +326,7 @@ export default function ParticipantesPage() {
               <span className="text-3xl">⚠️</span>
             </div>
             <p className="text-error text-lg font-semibold mb-2">Error al cargar participantes</p>
-            <p className="text-secondary text-sm">Por favor, intenta recargar la página</p>
+            <p className="text-secondary text-sm">Por favor, intenta recargar la pagina</p>
           </div>
         ) : participantes.length > 0 ? (
           <>
@@ -300,7 +336,7 @@ export default function ParticipantesPage() {
                   <tr>
                     <th>Nombre</th>
                     <th>Email</th>
-                    <th>Teléfono</th>
+                    <th>Telefono</th>
                     <th>Estado</th>
                     <th>Fecha registro</th>
                     <th className="text-right">Acciones</th>
@@ -343,27 +379,31 @@ export default function ParticipantesPage() {
                         </span>
                       </td>
                       <td className="text-right">
-                        <div className="inline-flex gap-2">
-                          <Link
-                            to={`/participantes/${participante.id}/editar`}
-                            className="inline-flex items-center gap-1 rounded-component px-3 py-1.5 text-primary-600 hover:bg-primary-50 hover:text-primary-700 focus-ring transition-all"
-                            aria-label={`Editar participante ${participante.nombre} ${participante.apellido}`}
-                          >
-                            <Edit className="h-4 w-4" aria-hidden="true" />
-                            <span className="text-xs font-medium">Editar</span>
-                          </Link>
-                          <button
-                            onClick={() =>
-                              handleDelete(participante.id, `${participante.nombre} ${participante.apellido}`)
-                            }
-                            className="inline-flex items-center gap-1 rounded-component px-3 py-1.5 text-error hover:bg-error-50 focus-ring transition-all"
-                            type="button"
-                            aria-label={`Eliminar participante ${participante.nombre} ${participante.apellido}`}
-                          >
-                            <Trash2 className="h-4 w-4" aria-hidden="true" />
-                            <span className="text-xs font-medium">Eliminar</span>
-                          </button>
-                        </div>
+                        {canManageParticipantes ? (
+                          <div className="inline-flex gap-2">
+                            <Link
+                              to={`/participantes/${participante.id}/editar`}
+                              className="inline-flex items-center gap-1 rounded-component px-3 py-1.5 text-primary-600 hover:bg-primary-50 hover:text-primary-700 focus-ring transition-all"
+                              aria-label={`Editar participante ${participante.nombre} ${participante.apellido}`}
+                            >
+                              <Edit className="h-4 w-4" aria-hidden="true" />
+                              <span className="text-xs font-medium">Editar</span>
+                            </Link>
+                            <button
+                              onClick={() =>
+                                handleDelete(participante.id, `${participante.nombre} ${participante.apellido}`)
+                              }
+                              className="inline-flex items-center gap-1 rounded-component px-3 py-1.5 text-error hover:bg-error-50 focus-ring transition-all"
+                              type="button"
+                              aria-label={`Eliminar participante ${participante.nombre} ${participante.apellido}`}
+                            >
+                              <Trash2 className="h-4 w-4" aria-hidden="true" />
+                              <span className="text-xs font-medium">Eliminar</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-tertiary">Sin permisos</span>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -378,7 +418,7 @@ export default function ParticipantesPage() {
               <div className="flex flex-col-reverse gap-3 md:flex-row md:items-center md:gap-4">
                 <div className="flex items-center gap-2">
                   <label htmlFor="page-size-select" className="text-sm text-secondary font-medium">
-                    Filas por página:
+                    Filas por pagina:
                   </label>
                   <select
                     id="page-size-select"
@@ -388,7 +428,7 @@ export default function ParticipantesPage() {
                       setPageSize(Number(event.target.value))
                       setPage(0)
                     }}
-                    aria-label="Cambiar cantidad de filas por página"
+                    aria-label="Cambiar cantidad de filas por pagina"
                     style={{ width: 'auto', minWidth: '6rem' }}
                   >
                     {PAGE_SIZE_OPTIONS.map((option) => (
@@ -404,7 +444,7 @@ export default function ParticipantesPage() {
                     className="btn btn-secondary disabled:cursor-not-allowed disabled:opacity-40"
                     onClick={() => setPage((current) => Math.max(current - 1, 0))}
                     disabled={page === 0 || isTableLoading}
-                    aria-label="Página anterior"
+                    aria-label="Pagina anterior"
                   >
                     ← Anterior
                   </button>
@@ -416,7 +456,7 @@ export default function ParticipantesPage() {
                     className="btn btn-secondary disabled:cursor-not-allowed disabled:opacity-40"
                     onClick={() => setPage((current) => current + 1)}
                     disabled={isTableLoading || totalPages === 0 || page >= totalPages - 1}
-                    aria-label="Página siguiente"
+                    aria-label="Pagina siguiente"
                   >
                     Siguiente →
                   </button>
@@ -432,7 +472,7 @@ export default function ParticipantesPage() {
             <h3 className="text-xl font-semibold text-text-primary mb-2">No se encontraron participantes</h3>
             <p className="text-secondary text-sm mb-6 max-w-md mx-auto">
               {searchQuery || estadoFilter
-                ? 'Intenta ajustar los filtros o realizar una búsqueda diferente'
+                ? 'Intenta ajustar los filtros o realizar una busqueda diferente'
                 : 'Comienza registrando tu primer participante'}
             </p>
             {!searchQuery && !estadoFilter && (
@@ -467,7 +507,7 @@ export default function ParticipantesPage() {
               type="button"
               className="modal-close"
               onClick={cancelDelete}
-              aria-label="Cerrar modal de eliminación"
+              aria-label="Cerrar modal de eliminacion"
               disabled={deleteMutation.isPending}
             >
               <X className="h-4 w-4" aria-hidden="true" />
@@ -475,16 +515,16 @@ export default function ParticipantesPage() {
             <div className="modal-icon">
               <Trash2 className="h-7 w-7" aria-hidden="true" />
             </div>
-            <span className="modal-eyebrow">Confirmar eliminación</span>
+            <span className="modal-eyebrow">Confirmar eliminacion</span>
             <h3 id="modal-delete-title" className="mt-4 text-center text-xl font-semibold text-text-primary">
               Eliminar participante
             </h3>
             <p id="modal-delete-description" className="mt-3 text-center text-sm text-secondary leading-relaxed">
-              ¿Estás seguro de que deseas eliminar a{' '}
+              ¿Estas seguro de que deseas eliminar a{' '}
               <span className="font-semibold text-text-primary">{deleteModal.nombre}</span> de la lista?
             </p>
             <p className="mt-2 text-center text-xs text-tertiary">
-              El participante será marcado como inactivo y podrá ser recuperado después.
+              El participante sera marcado como inactivo y podra ser recuperado despues.
             </p>
             <div className="modal-actions">
               <button

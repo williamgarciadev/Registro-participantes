@@ -27,7 +27,7 @@ const navItems: NavItem[] = [
   {
     label: 'Participantes',
     to: '/participantes',
-    description: 'Gestión de inscripciones y asistencia',
+    description: 'Gestion de inscripciones y asistencia',
     isActive: (path) => path.startsWith('/participantes'),
     icon: Users,
   },
@@ -35,8 +35,8 @@ const navItems: NavItem[] = [
 
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const navigate = useNavigate()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const { user, logout } = useAuth()
 
   const defaultHeader: PageHeaderState = useMemo(() => {
@@ -51,7 +51,7 @@ export default function Layout({ children }: LayoutProps) {
 
     return {
       title: 'Panel principal',
-      subtitle: 'Administración del sistema',
+      subtitle: 'Administracion del sistema',
       actions: null,
     }
   }, [location.pathname])
@@ -97,7 +97,7 @@ export default function Layout({ children }: LayoutProps) {
         <aside
           id="dashboard-sidebar"
           className={`dashboard-sidebar ${isSidebarOpen ? 'is-open' : ''}`}
-          aria-label="Menú principal"
+          aria-label="Menu principal"
         >
           <div className="dashboard-sidebar__header">
             <span className="dashboard-sidebar__logo" aria-hidden="true">
@@ -111,7 +111,7 @@ export default function Layout({ children }: LayoutProps) {
             </div>
           </div>
 
-          <nav className="dashboard-sidebar__nav" aria-label="Navegación principal">
+          <nav className="dashboard-sidebar__nav" aria-label="Navegacion principal">
             {navItems.map((item) => {
               const Icon = item.icon
               const active = item.isActive(location.pathname)
@@ -132,9 +132,9 @@ export default function Layout({ children }: LayoutProps) {
           </nav>
 
           <div className="dashboard-sidebar__footer" aria-live="polite">
-            <span>Sesión activa como Administrador</span>
-            <span>Último acceso: hoy 08:45</span>
-            <span>Versión 1.2.0</span>
+            <span>Sesion activa como {roleLabel}</span>
+            <span>{displayName}</span>
+            <span>Version 1.2.0</span>
           </div>
         </aside>
 
@@ -151,7 +151,7 @@ export default function Layout({ children }: LayoutProps) {
                 type="button"
                 className="dashboard-topbar__toggle"
                 onClick={() => setIsSidebarOpen((open) => !open)}
-                aria-label="Alternar menú lateral"
+                aria-label="Alternar menu lateral"
                 aria-controls="dashboard-sidebar"
                 aria-expanded={isSidebarOpen}
               >
@@ -174,25 +174,33 @@ export default function Layout({ children }: LayoutProps) {
                 <button type="button" className="dashboard-topbar__toggle" aria-label="Ver notificaciones">
                   <Bell className="h-5 w-5" aria-hidden="true" />
                 </button>
-                <div className="dashboard-user" role="group" aria-label="Información de usuario">
+                <div className="dashboard-user" role="group" aria-label="Informacion de usuario">
                   <span className="dashboard-user__avatar" aria-hidden="true">
                     <UserCircle className="h-5 w-5" />
                   </span>
                   <div className="dashboard-user__meta">
-                    <span className="dashboard-user__name">Coordinación</span>
-                    <span className="dashboard-user__role">Administrador</span>
+                    <span className="dashboard-user__name">{displayName}</span>
+                    <span className="dashboard-user__role">{roleLabel}</span>
                   </div>
                 </div>
+                <button
+                  type="button"
+                  className="dashboard-topbar__toggle"
+                  onClick={handleLogout}
+                  aria-label="Cerrar sesion"
+                >
+                  <LogOut className="h-5 w-5" aria-hidden="true" />
+                </button>
               </div>
             </div>
           </header>
 
           <main className="dashboard-main" role="main">
-            <div className="dashboard-main__inner">{children}</div>
+            <div className="dashboard-main__inner">{content}</div>
           </main>
 
           <footer className="dashboard-footer">
-            © {new Date().getFullYear()} Sistema de Registro de Participantes. Todos los derechos reservados.
+            &copy; {new Date().getFullYear()} Sistema de Registro de Participantes. Todos los derechos reservados.
           </footer>
         </div>
       </div>

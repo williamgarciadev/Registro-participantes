@@ -6,11 +6,14 @@ import ParticipanteForm from '@/components/ParticipanteForm'
 import { participantesApi } from '@/services/participantes'
 import type { ParticipanteCreate, ParticipanteUpdate } from '@/types/participante'
 import { usePageHeader } from '@/components/PageHeaderContext'
+import { useAuth } from '@/components/AuthProvider'
 
 export default function NuevoParticipantePage() {
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const { setHeader, resetHeader } = usePageHeader()
+  const { hasPermission } = useAuth()
+  const canManageParticipantes = hasPermission('participantes:manage')
 
   useEffect(() => {
     setHeader({
@@ -39,6 +42,24 @@ export default function NuevoParticipantePage() {
 
   const handleSubmit = (data: ParticipanteCreate | ParticipanteUpdate) => {
     createMutation.mutate(data as ParticipanteCreate)
+  }
+
+  if (!canManageParticipantes) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6">
+        <div className="mb-8">
+          <h1 className="heading-1">Nuevo participante</h1>
+          <p className="text-secondary mt-1">Necesitas permisos de edicion para registrar participantes.</p>
+        </div>
+
+        <div className="card p-6 text-center">
+          <h2 className="text-lg font-semibold text-text-primary">Acceso restringido</h2>
+          <p className="mt-2 text-sm text-secondary">
+            Solicita al administrador del sistema que te otorgue el permiso participantes:manage.
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (

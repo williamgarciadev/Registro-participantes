@@ -17,6 +17,21 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
+const fallbackContext: AuthContextValue = {
+  user: null,
+  token: null,
+  initializing: false,
+  isAuthenticating: false,
+  login: async () => {
+    throw new Error('AuthProvider no esta disponible')
+  },
+  logout: () => {
+    console.warn('logout llamado sin AuthProvider')
+  },
+  hasPermission: () => false,
+  hasRole: () => false,
+}
+
 const TOKEN_STORAGE_KEY = 'rp_auth_token'
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -43,7 +58,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       setToken(null)
       setUser(null)
-      console.error('No fue posible recuperar la sesión', error)
+      console.error('No fue posible recuperar la sesion', error)
     } finally {
       setInitializing(false)
     }
@@ -59,7 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     registerUnauthorizedHandler(() => {
       setToken(null)
       setUser(null)
-      toast.error('Tu sesión ha expirado, inicia sesión nuevamente')
+      toast.error('Tu sesion ha expirado, inicia sesion nuevamente')
     })
     return () => {
       registerUnauthorizedHandler(null)
@@ -73,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(tokenResponse.access_token)
       const profile = await authApi.profile()
       setUser(profile)
-      toast.success('Sesión iniciada correctamente')
+      toast.success('Sesion iniciada correctamente')
       return profile
     } catch (error) {
       setToken(null)
@@ -123,8 +138,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth(): AuthContextValue {
   const context = useContext(AuthContext)
-  if (!context) {
-    throw new Error('useAuth debe utilizarse dentro de AuthProvider')
-  }
-  return context
+  return context ?? fallbackContext
 }
+
