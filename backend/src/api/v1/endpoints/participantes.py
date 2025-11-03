@@ -9,6 +9,7 @@ from aws_lambda_powertools import Logger, Tracer
 
 from src.database.session import get_db
 from src.models.participante import EstadoParticipante
+from src.core.security import require_permissions
 from src.schemas.participante import (
     ParticipanteCreate,
     ParticipanteUpdate,
@@ -27,7 +28,8 @@ router = APIRouter()
     "/",
     response_model=ParticipanteResponse,
     status_code=status.HTTP_201_CREATED,
-    summary="Crear un nuevo participante"
+    summary="Crear un nuevo participante",
+    dependencies=[Depends(require_permissions("participantes:manage"))],
 )
 @tracer.capture_method
 async def create_participante(
@@ -50,7 +52,8 @@ async def create_participante(
 @router.get(
     "/",
     response_model=ParticipanteList,
-    summary="Listar participantes"
+    summary="Listar participantes",
+    dependencies=[Depends(require_permissions("participantes:view"))],
 )
 @tracer.capture_method
 async def list_participantes(
@@ -78,7 +81,8 @@ async def list_participantes(
 @router.get(
     "/search",
     response_model=ParticipanteList,
-    summary="Buscar participantes"
+    summary="Buscar participantes",
+    dependencies=[Depends(require_permissions("participantes:view"))],
 )
 @tracer.capture_method
 async def search_participantes(
@@ -104,7 +108,8 @@ async def search_participantes(
 @router.get(
     "/{participante_id}",
     response_model=ParticipanteResponse,
-    summary="Obtener un participante por ID"
+    summary="Obtener un participante por ID",
+    dependencies=[Depends(require_permissions("participantes:view"))],
 )
 @tracer.capture_method
 async def get_participante(
@@ -121,7 +126,8 @@ async def get_participante(
 @router.put(
     "/{participante_id}",
     response_model=ParticipanteResponse,
-    summary="Actualizar un participante"
+    summary="Actualizar un participante",
+    dependencies=[Depends(require_permissions("participantes:manage"))],
 )
 @tracer.capture_method
 async def update_participante(
@@ -139,7 +145,8 @@ async def update_participante(
 @router.delete(
     "/{participante_id}",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="Eliminar un participante"
+    summary="Eliminar un participante",
+    dependencies=[Depends(require_permissions("participantes:manage"))],
 )
 @tracer.capture_method
 async def delete_participante(

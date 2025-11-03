@@ -1,0 +1,162 @@
+from datetime import datetime, timedelta, timezone
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.core.config import settings
+from src.core.security import create_access_token, get_current_user, get_password_hash, verify_password
+from src.database.session import get_db
+from src.models.user import User
+from src.schemas.auth.token import AuthenticatedUser, LoginRequest, TokenResponse
+from src.services.user_service import UserService
+
+router = APIRouter()
+
+
+async def authenticate_user(db: AsyncSession, email: str, password: str) -> User | None:
+    """Valida credenciales contra la base de datos."""
+    user = await UserService.get_by_email(db, email)
+    if not user or not verify_password(password, user.hashed_password):
+        return None
+    return user
+
+
+async def ensure_admin_role(db: AsyncSession) -> None:
+    """
+    Garantiza que exista el rol admin y un usuario inicial.
+    Pensado para entornos demo/desarrollo; en producción se debe provisionar fuera de la API.
+    """
+    admin_role = await UserService.get_role_by_name(db, "admin")
+    if admin_role:
+        return
+
+    view_participants = await UserService.create_permission(
+        db,
+        code="participantes:view",
+        name="Ver participantes",
+        description="Listar y consultar participantes",
+    )
+    manage_participants = await UserService.create_permission(
+        db,
+        code="participantes:manage",
+        name="Gestionar participantes",
+        description="Crear, editar y eliminar participantes",
+    )
+    view_reports = await UserService.create_permission(
+        db,
+        code="reports:view",
+        name="Ver reportes",
+        description="Consultar paneles e indicadores agregados",
+    )
+
+    admin_role = await UserService.create_role(
+        db,
+        name="admin",
+        description="Administrador del sistema",
+        permissions=[view_participants, manage_participants, view_reports],
+    )
+
+    hashed_password = get_password_hash("admin123")
+
+    try:
+        await UserService.create_user(
+            db,
+            email="admin@demo.local",
+            hashed_password=hashed_password,
+            full_name="Administrador",
+            is_superuser=True,
+            roles=[admin_role],
+        )
+    except HTTPException:
+        # Usuario ya existe, no es necesario duplicarlo
+        pass
+
+
+@router.post(
+    "/login",
+    response_model=TokenResponse,
+    summary="Iniciar sesión y obtener token de acceso",
+)
+async def login_credentials(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    db: AsyncSession = Depends(get_db),
+):
+    await ensure_admin_role(db)
+
+    user = await authenticate_user(db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales inválidas",
+        )
+
+    now = datetime.now(timezone.utc)
+    expires_delta = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    token = create_access_token(
+        subject=user.id,
+        expires_delta=expires_delta,
+        scopes=[role.name for role in user.roles],
+        extra_claims={"is_superuser": user.is_superuser},
+    )
+
+    user.last_login_at = now
+
+    return TokenResponse(
+        access_token=token,
+        expires_at=now + expires_delta,
+    )
+
+
+@router.post(
+    "/login/json",
+    response_model=TokenResponse,
+    summary="Iniciar sesión con payload JSON",
+)
+async def login_json(credentials: LoginRequest, db: AsyncSession = Depends(get_db)):
+    await ensure_admin_role(db)
+
+    user = await authenticate_user(db, credentials.email, credentials.password)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Credenciales inválidas",
+        )
+
+    now = datetime.now(timezone.utc)
+    expires_delta = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    token = create_access_token(
+        subject=user.id,
+        expires_delta=expires_delta,
+        scopes=[role.name for role in user.roles],
+        extra_claims={"is_superuser": user.is_superuser},
+    )
+
+    user.last_login_at = now
+
+    return TokenResponse(
+        access_token=token,
+        expires_at=now + expires_delta,
+    )
+
+
+@router.get(
+    "/profile",
+    response_model=AuthenticatedUser,
+    summary="Obtener perfil del usuario autenticado",
+)
+async def get_profile(
+    current_user: Annotated[User, Depends(get_current_user)],
+    db: AsyncSession = Depends(get_db),
+):
+    permissions = await UserService.list_permissions_for_user(db, current_user)
+
+    return AuthenticatedUser(
+        id=str(current_user.id),
+        email=current_user.email,
+        full_name=current_user.full_name,
+        is_superuser=current_user.is_superuser,
+        roles=[role.name for role in current_user.roles],
+        permissions=permissions,
+    )
