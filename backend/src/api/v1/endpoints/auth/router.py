@@ -206,3 +206,28 @@ async def get_profile(
         roles=[role.name for role in current_user.roles],
         permissions=permissions,
     )
+
+
+@router.post(
+    "/init-permissions",
+    summary="Inicializar permisos del sistema",
+    description="Crea todos los permisos predefinidos del sistema si no existen. Útil para setup inicial.",
+)
+async def initialize_permissions(db: AsyncSession = Depends(get_db)):
+    """
+    Inicializa o actualiza los permisos del sistema.
+    
+    - Crea permisos que no existen
+    - No modifica permisos existentes
+    - Retorna estadísticas de la operación
+    """
+    from src.scripts.init_permissions import init_system_permissions
+    
+    result = await init_system_permissions(db)
+    
+    return {
+        "message": "Permisos inicializados correctamente",
+        "created": result["created"],
+        "existing": result["existing"],
+        "total": result["total"],
+    }

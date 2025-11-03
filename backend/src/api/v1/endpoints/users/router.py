@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.security import require_permissions
 from src.database.session import get_db
 from src.schemas.user.base import (
+    PermissionCatalogResponse,
     PermissionResponse,
     RoleCreate,
     RoleResponse,
@@ -165,3 +166,27 @@ async def list_permissions(
 ):
     permissions, total = await UserService.list_permissions(db, limit=limit, offset=offset, search=search)
     return PaginatedPermissions(items=permissions, total=total, limit=limit, offset=offset)
+
+
+@router.get(
+    "/permissions/catalog",
+    response_model=PermissionCatalogResponse,
+    summary="Catálogo completo de permisos",
+    description="Retorna todos los permisos del sistema agrupados por módulo. No requiere paginación.",
+    dependencies=[Depends(require_permissions("permissions:view"))],
+)
+async def get_permissions_catalog(db: AsyncSession = Depends(get_db)):
+    """
+    Obtiene el catálogo completo de permisos agrupados por módulo.
+    
+    Útil para:
+    - Interfaces de administración de roles
+    - Documentación automática del sistema
+    - Configuración de permisos en UI
+    
+    Los permisos se agrupan por módulo (primera parte del código antes del ':')
+    Ejemplo: 'participantes:view' se agrupa en el módulo 'participantes'
+    """
+    catalog = await UserService.get_permissions_catalog(db)
+    total = sum(len(perms) for perms in catalog.values())
+    return PermissionCatalogResponse(total=total, modules=catalog)

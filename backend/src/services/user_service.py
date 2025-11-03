@@ -123,6 +123,36 @@ class UserService:
         total = await db.execute(count_query)
         return permissions, total.scalar_one()
 
+    @staticmethod
+    async def get_permissions_catalog(db: AsyncSession) -> dict[str, List[dict]]:
+        """
+        Retorna todos los permisos del sistema agrupados por módulo.
+        Útil para UIs de administración y documentación.
+        """
+        result = await db.execute(select(Permission).order_by(Permission.code.asc()))
+        all_permissions = result.scalars().all()
+
+        # Agrupar permisos por módulo (primera parte antes del ':')
+        catalog: dict[str, List[dict]] = {}
+        for perm in all_permissions:
+            # Extraer módulo y acción del código (formato: "modulo:accion")
+            parts = perm.code.split(":", 1)
+            module = parts[0] if len(parts) > 0 else "general"
+            action = parts[1] if len(parts) > 1 else perm.code
+
+            if module not in catalog:
+                catalog[module] = []
+
+            catalog[module].append({
+                "code": perm.code,
+                "name": perm.name,
+                "description": perm.description,
+                "module": module,
+                "action": action,
+            })
+
+        return catalog
+
     # ------------------------------------------------------------------
     # Roles
     # ------------------------------------------------------------------

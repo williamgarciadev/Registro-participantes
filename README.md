@@ -246,9 +246,29 @@ aws cloudfront create-invalidation --distribution-id ID --paths "/*"
 }
 ```
 
-## 🔐 Variables de Entorno
+## 🔒 Seguridad y Checklist
 
-### Backend
+| Capa | Riesgos tipicos | Mitigacion recomendada |
+|------|-----------------|------------------------|
+| **Frontend (React)** | Cross-Site Scripting (XSS), manipulacion de librerias externas. | Validar y sanear en backend, agregar Content-Security-Policy, Referrer-Policy y Subresource Integrity al usar CDNs. Evitar render HTML directo. |
+| **Reverse Proxy / Nginx** | Ataques DoS, exposicion de cabeceras o versiones. | Configurar limit_req/limit_conn, asegurar server_tokens off, enviar cabeceras X-Frame-Options DENY, X-Content-Type-Options nosniff, Strict-Transport-Security. |
+| **Backend (FastAPI)** | Inyecciones, endpoints sin autenticacion, fugas en logs. | Usar SQLAlchemy/Pydantic, proteger rutas con require_permissions, enmascarar datos sensibles en logs, aplicar rate limiting en /auth/login. |
+| **Base de datos (Aurora PostgreSQL)** | Credenciales expuestas, puerto 5432 publico, backups sin cifrar. | Guardar secretos en AWS Secrets Manager, restringir a subred privada, cifrar y rotar backups y contrasenas. |
+| **Contenedores Docker** | Imagenes vulnerables, procesos corriendo como root. | Basarse en imagenes *-slim, definir USER appuser, escanear con Trivy/Snyk y usar readOnlyRootFilesystem. |
+| **Infraestructura (host)** | Acceso no autorizado al host, docker socket expuesto. | Habilitar firewall (ufw/iptables), restringir acceso a docker.sock, deshabilitar SSH por password, monitorear accesos. |
+
+### Checklist de acciones
+
+- [ ] Frontend: revisar formularios y evitar HTML no confiable; desplegar CSP en modo report-only y luego endurecerla.
+- [ ] Proxy: agregar rate limiting en Nginx y validar cabeceras seguras en cada despliegue.
+- [ ] Backend: auditar endpoints para confirmar uso de require_permissions; anadir throttling para login/acciones criticas.
+- [ ] Base de datos: rotar credenciales via Secrets Manager y verificar que el puerto siga privado.
+- [ ] Contenedores: ejecutar escaneos de vulnerabilidades en el pipeline y asegurar que las imagenes no corran como root.
+- [ ] Infraestructura: endurecer SSH (solo llaves), proteger el host y configurar alertas (CPU, 4xx/5xx, intentos fallidos).
+
+```
+
+## 🔐 Variables de Entorno Backend
 
 ```bash
 DATABASE_URL=postgresql://user:pass@host:5432/dbname

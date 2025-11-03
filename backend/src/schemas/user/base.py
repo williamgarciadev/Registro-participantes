@@ -20,6 +20,27 @@ class PermissionResponse(PermissionBase):
         from_attributes = True
 
 
+class PermissionCatalogItem(BaseModel):
+    """Esquema para catálogo de permisos agrupados por módulo"""
+    code: str
+    name: str
+    description: Optional[str] = None
+    module: str = Field(..., description="Módulo al que pertenece el permiso (ej: 'participantes', 'users')")
+    action: str = Field(..., description="Acción del permiso (ej: 'view', 'create', 'manage')")
+
+    class Config:
+        from_attributes = True
+
+
+class PermissionCatalogResponse(BaseModel):
+    """Respuesta del catálogo completo de permisos"""
+    total: int = Field(..., description="Total de permisos en el sistema")
+    modules: dict[str, List[PermissionCatalogItem]] = Field(
+        ..., 
+        description="Permisos agrupados por módulo"
+    )
+
+
 class RoleBase(BaseModel):
     name: str = Field(..., min_length=2, max_length=50)
     description: Optional[str] = Field(default=None, max_length=255)
