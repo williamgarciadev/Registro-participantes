@@ -4,6 +4,9 @@ import HomePage from './pages/HomePage'
 import ParticipantesPage from './pages/ParticipantesPage'
 import NuevoParticipantePage from './pages/NuevoParticipantePage'
 import EditarParticipantePage from './pages/EditarParticipantePage'
+import AdminUsersPage from './pages/AdminUsersPage'
+import AdminRolesPage from './pages/AdminRolesPage'
+import AdminPermissionsPage from './pages/AdminPermissionsPage'
 import LoginPage from './pages/LoginPage'
 import LoginPreview from './pages/LoginPreview'
 
@@ -25,6 +28,9 @@ function App() {
               <Route path="/participantes" element={<ParticipantesPage />} />
               <Route path="/participantes/nuevo" element={<NuevoParticipantePage />} />
               <Route path="/participantes/:id/editar" element={<EditarParticipantePage />} />
+              <Route path="/admin/users" element={<AdminUsersPage />} />
+              <Route path="/admin/roles" element={<AdminRolesPage />} />
+              <Route path="/admin/permisos" element={<AdminPermissionsPage />} />
             </Routes>
           </Layout>
         } />

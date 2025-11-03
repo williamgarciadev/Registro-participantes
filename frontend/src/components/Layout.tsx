@@ -1,6 +1,6 @@
 import { ReactNode, useState, useEffect, useMemo, useCallback, FormEvent, useRef } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Users, Home, Menu, Search, UserCircle, ChevronDown } from 'lucide-react'
+import { Users, Home, Menu, Search, UserCircle, ChevronDown, UserCog, Shield, Key } from 'lucide-react'
 import PageHeaderContext, { PageHeaderState } from './PageHeaderContext'
 import { useAuth } from './AuthProvider'
 import { NotificationDropdown } from './NotificationDropdown'
@@ -15,9 +15,10 @@ interface NavItem {
   description: string
   isActive: (path: string) => boolean
   icon: typeof Home
+  requiredPermission?: string
 }
 
-const navItems: NavItem[] = [
+const baseNavItems: NavItem[] = [
   {
     label: 'Inicio',
     to: '/',
@@ -32,6 +33,30 @@ const navItems: NavItem[] = [
     isActive: (path) => path.startsWith('/participantes'),
     icon: Users,
   },
+  {
+    label: 'Usuarios',
+    to: '/admin/users',
+    description: 'Administracion de cuentas y accesos',
+    isActive: (path) => path.startsWith('/admin/users'),
+    icon: UserCog,
+    requiredPermission: 'users:view',
+  },
+  {
+    label: 'Roles',
+    to: '/admin/roles',
+    description: 'Definicion de roles y responsabilidades',
+    isActive: (path) => path.startsWith('/admin/roles'),
+    icon: Shield,
+    requiredPermission: 'roles:view',
+  },
+  {
+    label: 'Permisos',
+    to: '/admin/permisos',
+    description: 'Catalogo de permisos disponibles',
+    isActive: (path) => path.startsWith('/admin/permisos'),
+    icon: Key,
+    requiredPermission: 'permissions:view',
+  },
 ]
 
 export default function Layout({ children }: LayoutProps) {
@@ -40,7 +65,13 @@ export default function Layout({ children }: LayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const userMenuRef = useRef<HTMLDivElement | null>(null)
-  const { user, logout } = useAuth()
+  const { user, logout, hasPermission } = useAuth()
+
+  const navItems = useMemo(
+    () =>
+      baseNavItems.filter((item) => !item.requiredPermission || hasPermission(item.requiredPermission)),
+    [hasPermission]
+  )
 
   const defaultHeader: PageHeaderState = useMemo(() => {
     const activeItem = navItems.find((item) => item.isActive(location.pathname))

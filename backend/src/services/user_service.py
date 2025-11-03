@@ -9,7 +9,6 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from src.core.security import get_password_hash
 from src.models.user import Permission, Role, User
 
 
@@ -283,6 +282,8 @@ class UserService:
 
     @staticmethod
     async def create_user_with_roles(db: AsyncSession, payload) -> User:
+        from src.core.security import get_password_hash
+        
         roles = await UserService.get_roles_by_ids(db, payload.role_ids or [])
         hashed_password = get_password_hash(payload.password)
         return await UserService.create_user(
@@ -297,6 +298,8 @@ class UserService:
 
     @staticmethod
     async def update_user(db: AsyncSession, user_id: UUID, payload) -> User:
+        from src.core.security import get_password_hash
+        
         user = await UserService.get_by_id(db, user_id)
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Usuario no encontrado")

@@ -1,0 +1,47 @@
+export interface UserSummary {
+  id: string
+  email: string
+  full_name?: string | null
+  is_active: boolean
+  is_superuser: boolean
+  roles: string[]
+}
+
+export interface PaginatedUsers {
+  items: UserSummary[]
+  total: number
+  limit: number
+  offset: number
+}
+
+export interface RoleResponse {
+  id: string
+  name: string
+  description?: string | null
+  created_at: string
+  updated_at: string
+  permissions: PermissionResponse[]
+}
+
+export interface PaginatedRoles {
+  items: RoleResponse[]
+  total: number
+  limit: number
+  offset: number
+}
+
+export interface PermissionResponse {
+  id: string
+  code: string
+  name: string
+  description?: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface PaginatedPermissions {
+  items: PermissionResponse[]
+  total: number
+  limit: number
+  offset: number
+}
