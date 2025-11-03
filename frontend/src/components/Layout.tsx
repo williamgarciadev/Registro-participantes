@@ -36,6 +36,8 @@ const navItems: NavItem[] = [
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const navigate = useNavigate()
+  const { user, logout } = useAuth()
 
   const defaultHeader: PageHeaderState = useMemo(() => {
     const activeItem = navItems.find((item) => item.isActive(location.pathname))
@@ -79,6 +81,15 @@ export default function Layout({ children }: LayoutProps) {
   const handleSearch = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
   }
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login', { replace: true })
+  }
+
+  const content = children ?? <Outlet />
+  const displayName = user?.full_name?.trim() ? user.full_name : user?.email ?? 'Usuario'
+  const roleLabel = user?.is_superuser ? 'Superadministrador' : user?.roles?.[0] ?? 'Usuario'
 
   return (
     <PageHeaderContext.Provider value={{ header, setHeader, resetHeader }}>
