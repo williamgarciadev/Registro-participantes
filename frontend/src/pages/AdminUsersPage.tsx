@@ -3,8 +3,9 @@ import { useQuery } from '@tanstack/react-query'
 import { Search, UserPlus, Users as UsersIcon, Shield, CheckCircle, XCircle, Crown } from 'lucide-react'
 
 import { adminApi } from '@/services/admin'
-import type { UserSummary } from '@/types/admin'
+import type { UserSummary, UserResponse } from '@/types/admin'
 import { useAuth } from '@/components/AuthProvider'
+import UserModal from '@/components/UserModal'
 
 const PAGE_LIMIT = 20
 
@@ -16,6 +17,11 @@ export default function AdminUsersPage() {
 
   const [search, setSearch] = useState('')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
+  
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedUser, setSelectedUser] = useState<UserResponse | null>(null)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   const queryKey = useMemo(() => ['admin-users', search, filterStatus], [search, filterStatus])
 
@@ -165,6 +171,21 @@ export default function AdminUsersPage() {
             <button type="submit" className="btn btn-secondary">
               Buscar
             </button>
+
+            {canManageUsers && (
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={() => {
+                  setSelectedUser(null)
+                  setModalMode('create')
+                  setIsModalOpen(true)
+                }}
+              >
+                <UserPlus className="h-4 w-4" />
+                Nuevo usuario
+              </button>
+            )}
           </div>
         </form>
       </section>
@@ -278,6 +299,17 @@ export default function AdminUsersPage() {
           </div>
         )}
       </section>
+
+      {/* User Modal */}
+      <UserModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedUser(null)
+        }}
+        user={selectedUser}
+        mode={modalMode}
+      />
     </div>
   )
 }

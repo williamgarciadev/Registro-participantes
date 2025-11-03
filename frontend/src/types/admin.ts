@@ -7,6 +7,18 @@ export interface UserSummary {
   roles: string[]
 }
 
+export interface UserResponse {
+  id: string
+  email: string
+  full_name?: string | null
+  is_active: boolean
+  is_superuser: boolean
+  last_login_at?: string | null
+  created_at: string
+  updated_at: string
+  roles: RoleResponse[]
+}
+
 export interface PaginatedUsers {
   items: UserSummary[]
   total: number

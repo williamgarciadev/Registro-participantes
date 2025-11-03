@@ -5,6 +5,7 @@ import { Shield, Search, Users as UsersIcon, Key, ChevronDown, ChevronUp } from 
 import { adminApi } from '@/services/admin'
 import { useAuth } from '@/components/AuthProvider'
 import type { RoleResponse } from '@/types/admin'
+import RoleModal from '@/components/RoleModal'
 
 export default function AdminRolesPage() {
   const { hasPermission } = useAuth()
@@ -12,6 +13,11 @@ export default function AdminRolesPage() {
 
   const [search, setSearch] = useState('')
   const [expandedRoles, setExpandedRoles] = useState<Set<string>>(new Set())
+
+  // Modal state
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedRole, setSelectedRole] = useState<RoleResponse | null>(null)
+  const [modalMode, setModalMode] = useState<'create' | 'edit'>('create')
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['admin-roles'],
@@ -133,15 +139,33 @@ export default function AdminRolesPage() {
 
       {/* Search */}
       <section className="card">
-        <div className="flex w-full items-center gap-2 rounded-component border border-neutral-200 bg-white px-3 py-2 shadow-sm sm:max-w-md">
-          <Search className="h-4 w-4 text-neutral-500" aria-hidden="true" />
-          <input
-            className="flex-1 border-none bg-transparent text-sm focus:outline-none"
-            placeholder="Buscar roles por nombre o descripción..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
+        <div className="flex items-center gap-3">
+          <div className="flex flex-1 items-center gap-2 rounded-component border border-neutral-200 bg-white px-3 py-2 shadow-sm sm:max-w-md">
+            <Search className="h-4 w-4 text-neutral-500" aria-hidden="true" />
+            <input
+              className="flex-1 border-none bg-transparent text-sm focus:outline-none"
+              placeholder="Buscar roles por nombre o descripción..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+
+          {canManageRoles && (
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setSelectedRole(null)
+                setModalMode('create')
+                setIsModalOpen(true)
+              }}
+            >
+              <Shield className="h-4 w-4" />
+              Nuevo rol
+            </button>
+          )}
         </div>
+
         {search && (
           <p className="mt-3 text-sm text-secondary">
             Mostrando {filteredRoles.length} de {roles.length} roles
@@ -282,6 +306,17 @@ export default function AdminRolesPage() {
           </div>
         )}
       </section>
+
+      {/* Role Modal */}
+      <RoleModal
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false)
+          setSelectedRole(null)
+        }}
+        role={selectedRole}
+        mode={modalMode}
+      />
     </div>
   )
 }
