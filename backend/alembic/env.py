@@ -1,5 +1,6 @@
 from logging.config import fileConfig
 import asyncio
+import os
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
@@ -19,6 +20,8 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 from src.database.session import Base
 from src.models.participante import Participante
+from src.models.user import User
+from src.models.password_reset import PasswordResetToken
 
 target_metadata = Base.metadata
 
@@ -64,9 +67,18 @@ async def run_async_migrations() -> None:
     and associate a connection with the context.
 
     """
-
+    # Get the URL from environment variable or config
+    configuration = config.get_section(config.config_ini_section, {})
+    url = os.getenv("DATABASE_URL") or configuration.get("sqlalchemy.url")
+    
+    # Ensure we use asyncpg driver
+    if url and url.startswith("postgresql://"):
+        url = url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    
+    configuration["sqlalchemy.url"] = url
+    
     connectable = async_engine_from_config(
-        config.get_section(config.config_ini_section, {}),
+        configuration,
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )

@@ -116,6 +116,13 @@ class User(Base):
         back_populates="users",
         lazy="selectin",
     )
+    
+    password_reset_tokens = relationship(
+        "PasswordResetToken",
+        back_populates="user",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
 
     def __repr__(self) -> str:
         return f"<User {self.email}>"

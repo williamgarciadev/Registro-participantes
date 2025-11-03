@@ -43,6 +43,19 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
     LOGIN_RATE_LIMIT: int = 5
     LOGIN_RATE_WINDOW_SECONDS: int = 60
+    
+    # Email y recuperación de contraseña
+    ENVIRONMENT: str = "development"  # development | production
+    FRONTEND_URL: str = "http://localhost:3000"  # URL del frontend para links de reset
+    EMAIL_FROM: str = "noreply@example.com"  # Email remitente
+    PASSWORD_RESET_RATE_LIMIT: int = 3  # Intentos de reset por ventana de tiempo
+    PASSWORD_RESET_RATE_WINDOW_SECONDS: int = 900  # 15 minutos
+    
+    # Gmail SMTP settings (para desarrollo)
+    GMAIL_USER: str = "wgarciamunoz@gmail.com"  # tu-email@gmail.com
+    GMAIL_APP_PASSWORD: str = "buxuiogqzgqrwecm"  # Contraseña de aplicación de Gmail (NO tu contraseña normal)
+    SMTP_HOST: str = "smtp.gmail.com"
+    SMTP_PORT: int = 587
 
     class Config:
         case_sensitive = True

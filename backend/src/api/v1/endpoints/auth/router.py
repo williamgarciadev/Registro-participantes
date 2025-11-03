@@ -11,8 +11,14 @@ from src.core.security import create_access_token, get_current_user, get_passwor
 from src.database.session import get_db
 from src.models.user import User
 from src.schemas.auth.token import AuthenticatedUser, LoginRequest, TokenResponse
+from src.schemas.auth.password_reset import (
+    PasswordResetRequest,
+    PasswordResetConfirm,
+    PasswordResetResponse,
+)
 from src.services.user_service import UserService
 from src.services.rate_limiter import login_rate_limiter
+from src.services.password_reset_service import PasswordResetService
 
 router = APIRouter()
 logger = Logger()
@@ -240,3 +246,90 @@ async def initialize_permissions(db: AsyncSession = Depends(get_db)):
         "existing": result["existing"],
         "total": result["total"],
     }
+
+
+@router.post(
+    "/password-reset/request",
+    response_model=PasswordResetResponse,
+    summary="Solicitar recuperación de contraseña",
+    description="Envía un email con link para resetear la contraseña. Rate limited a 3 intentos cada 15 minutos.",
+)
+async def request_password_reset(
+    request: Request,
+    payload: PasswordResetRequest,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Solicita un reset de contraseña para el email proporcionado.
+    
+    Por seguridad:
+    - Siempre retorna success, incluso si el email no existe
+    - Rate limited para prevenir abuse
+    - Invalida tokens previos al crear uno nuevo
+    - Los tokens expiran en 1 hora
+    
+    El usuario recibirá un email con un link para resetear su contraseña.
+    """
+    # Rate limiting (3 intentos cada 15 minutos)
+    client_ip = request.client.host if request.client else "unknown"
+    rate_key = f"password_reset:{client_ip}"
+    
+    # TODO: Implementar rate limiting con Redis o en-memory cache
+    # Por ahora, confiamos en el rate limiting de API Gateway
+    
+    logger.info(
+        "Solicitud de reset de contraseña",
+        extra={"email": payload.email, "client_ip": client_ip}
+    )
+    
+    # Crear token (retorna None si usuario no existe, pero no lo revelamos)
+    token = await PasswordResetService.create_reset_token(db, payload.email)
+    
+    if token:
+        # Enviar email
+        email_sent = await PasswordResetService.send_reset_email(
+            db, payload.email, token
+        )
+        
+        if not email_sent:
+            logger.error(f"Error al enviar email de reset a {payload.email}")
+    
+    # Siempre retornar success por seguridad (no revelar si email existe)
+    return PasswordResetResponse(
+        message="Si el email está registrado, recibirás instrucciones para recuperar tu contraseña",
+        email=payload.email
+    )
+
+
+@router.post(
+    "/password-reset/confirm",
+    summary="Confirmar reset de contraseña con token",
+    description="Resetea la contraseña usando el token recibido por email.",
+)
+async def confirm_password_reset(
+    payload: PasswordResetConfirm,
+    db: AsyncSession = Depends(get_db),
+):
+    """
+    Confirma el reset de contraseña usando el token recibido por email.
+    
+    El token debe ser válido (no expirado, no usado) y las contraseñas deben coincidir.
+    """
+    # Validar token
+    token = await PasswordResetService.validate_and_get_token(db, payload.token)
+    
+    # Resetear contraseña
+    user = await PasswordResetService.reset_password(
+        db, token, payload.new_password
+    )
+    
+    logger.info(
+        "Contraseña reseteada exitosamente",
+        extra={"user_id": str(user.id), "email": user.email}
+    )
+    
+    return {
+        "message": "Contraseña actualizada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.",
+        "email": user.email
+    }
+

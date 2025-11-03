@@ -74,6 +74,14 @@ export default function LoginPage() {
               className="form-input"
               placeholder="••••••••"
             />
+            <div className="mt-2 text-right">
+              <Link
+                to="/forgot-password"
+                className="text-sm text-primary-600 hover:text-primary-700 font-medium transition-colors"
+              >
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
           </div>
 
           <button 

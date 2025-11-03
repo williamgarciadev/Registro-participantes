@@ -266,6 +266,44 @@ aws cloudfront create-invalidation --distribution-id ID --paths "/*"
 - [ ] Contenedores: ejecutar escaneos de vulnerabilidades en el pipeline y asegurar que las imagenes no corran como root.
 - [ ] Infraestructura: endurecer SSH (solo llaves), proteger el host y configurar alertas (CPU, 4xx/5xx, intentos fallidos).
 
+## 🐳 Arquitectura Docker (desarrollo)
+
+```mermaid
+graph LR
+    subgraph "Bridge Network: app-network"
+        FE["Frontend (registro-participantes-web)
+Vite dev server
+Puertos 5173/3000"]
+        BE["Backend (registro-participantes-api)
+FastAPI + Uvicorn
+Puerto 8000"]
+        DB["PostgreSQL (registro-participantes-db)
+postgres:16-alpine
+Puerto 5432"]
+        PG["pgAdmin (registro-participantes-pgadmin)
+Panel opcional
+Puerto 5050"]
+    end
+
+    FE -->|HTTP REST (VITE_API_URL)| BE
+    BE -->|AsyncPG| DB
+    PG -->|Administración BD| DB
+
+    subgraph "Volúmenes locales"
+        V1[(postgres_data)]
+        V2[(pgadmin_data)]
+    end
+
+    V1 --- DB
+    V2 --- PG
+```
+
+Los contenedores se conectan mediante la red `app-network` creada por docker-compose:
+- **Frontend** expone los puertos 5173 y 3000 para desarrollo con hot reload.
+- **Backend** corre Uvicorn en el puerto 8000 y se comunica con PostgreSQL usando `postgres` como hostname interno.
+- **Postgres** persiste la información en el volumen `postgres_data`.
+- **pgAdmin** es opcional para administración visual y usa el volumen `pgadmin_data`.
+
 ## 🔐 Variables de Entorno
 
 ### Backend

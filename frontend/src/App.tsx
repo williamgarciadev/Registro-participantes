@@ -10,6 +10,8 @@ import AdminRolesPage from './pages/AdminRolesPage'
 import AdminPermissionsPage from './pages/AdminPermissionsPage'
 import LoginPage from './pages/LoginPage'
 import LoginPreview from './pages/LoginPreview'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 
 function App() {
   return (
@@ -17,6 +19,10 @@ function App() {
       <Routes>
         {/* Ruta de login funcional */}
         <Route path="/login" element={<LoginPage />} />
+        
+        {/* Rutas de recuperación de contraseña */}
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         
         {/* Ruta temporal para preview del diseño del login */}
         <Route path="/login-preview" element={<LoginPreview />} />
