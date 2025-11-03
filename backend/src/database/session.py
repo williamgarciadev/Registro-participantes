@@ -62,8 +62,8 @@ async def init_db():
         database_url,
         echo=settings.STAGE == "dev",
         pool_pre_ping=True,
-        pool_size=5,
-        max_overflow=10,
+        pool_size=settings.DB_POOL_SIZE,
+        max_overflow=settings.DB_MAX_OVERFLOW,
     )
 
     async_session_maker = async_sessionmaker(
@@ -121,11 +121,15 @@ async def create_tables():
 
 async def get_db():
     """Dependency para obtener una sesión de base de datos"""
+    if not async_session_maker:
+        raise RuntimeError("Database not initialized. Call init_db() first.")
+
     async with async_session_maker() as session:
         try:
             yield session
             await session.commit()
-        except Exception:
+        except Exception as e:
+            logger.error(f"Database error: {str(e)}")
             await session.rollback()
             raise
         finally:

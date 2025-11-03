@@ -1,71 +1,189 @@
-import { ReactNode } from 'react'
+import { ReactNode, useState, useEffect, useMemo, useCallback, FormEvent } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Users, Home } from 'lucide-react'
+import { Users, Home, Menu, Search, Bell, UserCircle } from 'lucide-react'
+import PageHeaderContext, { PageHeaderState } from './PageHeaderContext'
 
 interface LayoutProps {
   children: ReactNode
 }
 
+interface NavItem {
+  label: string
+  to: string
+  description: string
+  isActive: (path: string) => boolean
+  icon: typeof Home
+}
+
+const navItems: NavItem[] = [
+  {
+    label: 'Inicio',
+    to: '/',
+    description: 'Resumen general del sistema',
+    isActive: (path) => path === '/',
+    icon: Home,
+  },
+  {
+    label: 'Participantes',
+    to: '/participantes',
+    description: 'Gestión de inscripciones y asistencia',
+    isActive: (path) => path.startsWith('/participantes'),
+    icon: Users,
+  },
+]
+
 export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
-  const isActive = (path: string) => location.pathname === path
+  const defaultHeader: PageHeaderState = useMemo(() => {
+    const activeItem = navItems.find((item) => item.isActive(location.pathname))
+    if (activeItem) {
+      return {
+        title: activeItem.label,
+        subtitle: activeItem.description,
+        actions: null,
+      }
+    }
+
+    return {
+      title: 'Panel principal',
+      subtitle: 'Administración del sistema',
+      actions: null,
+    }
+  }, [location.pathname])
+
+  const [header, setHeaderState] = useState<PageHeaderState>(defaultHeader)
+
+  useEffect(() => {
+    setIsSidebarOpen(false)
+  }, [location.pathname])
+
+  useEffect(() => {
+    setHeaderState(defaultHeader)
+  }, [defaultHeader])
+
+  const setHeader = useCallback((nextHeader: PageHeaderState) => {
+    setHeaderState({
+      title: nextHeader.title,
+      subtitle: nextHeader.subtitle,
+      actions: nextHeader.actions ?? null,
+    })
+  }, [])
+
+  const resetHeader = useCallback(() => {
+    setHeaderState(defaultHeader)
+  }, [defaultHeader])
+
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Navbar */}
-      <nav className="bg-white shadow-sm border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <Link to="/" className="flex items-center">
-                <Users className="h-8 w-8 text-primary-600" />
-                <span className="ml-2 text-xl font-bold text-gray-900">
-                  Registro de Participantes
-                </span>
+    <PageHeaderContext.Provider value={{ header, setHeader, resetHeader }}>
+      <div className="dashboard-shell">
+        <aside
+          id="dashboard-sidebar"
+          className={`dashboard-sidebar ${isSidebarOpen ? 'is-open' : ''}`}
+          aria-label="Menú principal"
+        >
+          <div className="dashboard-sidebar__header">
+            <span className="dashboard-sidebar__logo" aria-hidden="true">
+              <Users className="h-6 w-6" />
+            </span>
+            <div>
+              <Link to="/" className="dashboard-sidebar__brand">
+                Registro de Participantes
               </Link>
-            </div>
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/"
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
-                  isActive('/')
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <Home className="h-4 w-4 mr-2" />
-                Inicio
-              </Link>
-              <Link
-                to="/participantes"
-                className={`flex items-center px-3 py-2 rounded-md text-sm font-medium ${
-                  isActive('/participantes') || location.pathname.startsWith('/participantes')
-                    ? 'bg-primary-100 text-primary-700'
-                    : 'text-gray-700 hover:bg-gray-100'
-                }`}
-              >
-                <Users className="h-4 w-4 mr-2" />
-                Participantes
-              </Link>
+              <div className="dashboard-sidebar__badge">Panel administrativo</div>
             </div>
           </div>
-        </div>
-      </nav>
 
-      {/* Main content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+          <nav className="dashboard-sidebar__nav" aria-label="Navegación principal">
+            {navItems.map((item) => {
+              const Icon = item.icon
+              const active = item.isActive(location.pathname)
 
-      {/* Footer */}
-      <footer className="bg-white border-t mt-auto">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <p className="text-center text-gray-500 text-sm">
-            © 2024 Sistema de Registro de Participantes. Todos los derechos reservados.
-          </p>
+              return (
+                <Link
+                  key={item.to}
+                  to={item.to}
+                  className={`dashboard-nav-link ${active ? 'dashboard-nav-link--active' : ''}`}
+                >
+                  <span className="dashboard-nav-link__icon" aria-hidden="true">
+                    <Icon className="h-4 w-4" />
+                  </span>
+                  <span>{item.label}</span>
+                </Link>
+              )
+            })}
+          </nav>
+
+          <div className="dashboard-sidebar__footer" aria-live="polite">
+            <span>Sesión activa como Administrador</span>
+            <span>Último acceso: hoy 08:45</span>
+            <span>Versión 1.2.0</span>
+          </div>
+        </aside>
+
+        <div
+          className={`dashboard-overlay ${isSidebarOpen ? 'is-visible' : ''}`}
+          onClick={() => setIsSidebarOpen(false)}
+          aria-hidden={!isSidebarOpen}
+        />
+
+        <div className="dashboard-content">
+          <header className="dashboard-topbar">
+            <div className="dashboard-topbar__left">
+              <button
+                type="button"
+                className="dashboard-topbar__toggle"
+                onClick={() => setIsSidebarOpen((open) => !open)}
+                aria-label="Alternar menú lateral"
+                aria-controls="dashboard-sidebar"
+                aria-expanded={isSidebarOpen}
+              >
+                <Menu className="h-5 w-5" aria-hidden="true" />
+              </button>
+              <div className="dashboard-topbar__heading">
+                <span className="dashboard-topbar__title">{header.title}</span>
+                {header.subtitle && <span className="dashboard-topbar__subtitle">{header.subtitle}</span>}
+              </div>
+            </div>
+
+            <div className="dashboard-topbar__right">
+              <form className="dashboard-search" role="search" onSubmit={handleSearch}>
+                <Search className="dashboard-search__icon h-4 w-4" aria-hidden="true" />
+                <input type="search" placeholder="Buscar en el panel..." aria-label="Buscar en el panel" />
+              </form>
+
+              <div className="dashboard-topbar__actions">
+                {header.actions}
+                <button type="button" className="dashboard-topbar__toggle" aria-label="Ver notificaciones">
+                  <Bell className="h-5 w-5" aria-hidden="true" />
+                </button>
+                <div className="dashboard-user" role="group" aria-label="Información de usuario">
+                  <span className="dashboard-user__avatar" aria-hidden="true">
+                    <UserCircle className="h-5 w-5" />
+                  </span>
+                  <div className="dashboard-user__meta">
+                    <span className="dashboard-user__name">Coordinación</span>
+                    <span className="dashboard-user__role">Administrador</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </header>
+
+          <main className="dashboard-main" role="main">
+            <div className="dashboard-main__inner">{children}</div>
+          </main>
+
+          <footer className="dashboard-footer">
+            © {new Date().getFullYear()} Sistema de Registro de Participantes. Todos los derechos reservados.
+          </footer>
         </div>
-      </footer>
-    </div>
+      </div>
+    </PageHeaderContext.Provider>
   )
 }

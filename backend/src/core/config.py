@@ -20,6 +20,8 @@ class Settings(BaseSettings):
     # Base de datos
     DB_SECRET_ARN: str = ""
     DATABASE_URL: str = ""
+    DB_POOL_SIZE: int = 5
+    DB_MAX_OVERFLOW: int = 10
 
     # AWS
     AWS_REGION: str = "us-east-1"

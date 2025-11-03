@@ -19,11 +19,7 @@ interface ParticipanteFormProps {
   isLoading?: boolean
 }
 
-export default function ParticipanteForm({
-  initialData,
-  onSubmit,
-  isLoading = false,
-}: ParticipanteFormProps) {
+export default function ParticipanteForm({ initialData, onSubmit, isLoading = false }: ParticipanteFormProps) {
   const {
     register,
     handleSubmit,
@@ -40,7 +36,6 @@ export default function ParticipanteForm({
     mode: 'onBlur',
   })
 
-  // Actualizar el formulario cuando initialData cambia
   useEffect(() => {
     if (initialData) {
       reset({
@@ -53,93 +48,114 @@ export default function ParticipanteForm({
   }, [initialData, reset])
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Nombre */}
-        <div>
-          <label htmlFor="nombre" className="block text-sm font-medium text-gray-700 mb-2">
-            Nombre *
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 animate-fade-in">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="form-group">
+          <label htmlFor="nombre" className="form-label">
+            Nombre <span className="text-error-500">*</span>
           </label>
           <input
             {...register('nombre')}
             type="text"
             id="nombre"
-            className="input"
-            placeholder="Juan"
+            className="input focus-ring"
+            placeholder="Ingrese el nombre"
             autoComplete="given-name"
+            aria-invalid={errors.nombre ? 'true' : 'false'}
+            aria-describedby={errors.nombre ? 'nombre-error' : undefined}
           />
           {errors.nombre && (
-            <p className="mt-1 text-sm text-red-600">{errors.nombre.message}</p>
+            <p id="nombre-error" className="form-error" role="alert">
+              ⚠️ {errors.nombre.message}
+            </p>
           )}
         </div>
-
-        {/* Apellido */}
-        <div>
-          <label htmlFor="apellido" className="block text-sm font-medium text-gray-700 mb-2">
-            Apellido *
+        <div className="form-group">
+          <label htmlFor="apellido" className="form-label">
+            Apellido <span className="text-error-500">*</span>
           </label>
           <input
             {...register('apellido')}
             type="text"
             id="apellido"
-            className="input"
-            placeholder="Pérez"
+            className="input focus-ring"
+            placeholder="Ingrese el apellido"
             autoComplete="family-name"
+            aria-invalid={errors.apellido ? 'true' : 'false'}
+            aria-describedby={errors.apellido ? 'apellido-error' : undefined}
           />
           {errors.apellido && (
-            <p className="mt-1 text-sm text-red-600">{errors.apellido.message}</p>
+            <p id="apellido-error" className="form-error" role="alert">
+              ⚠️ {errors.apellido.message}
+            </p>
           )}
         </div>
-
-        {/* Email */}
-        <div>
-          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
-            Email *
+        <div className="form-group">
+          <label htmlFor="email" className="form-label">
+            Email <span className="text-error-500">*</span>
           </label>
           <input
             {...register('email')}
             type="email"
             id="email"
-            className="input"
-            placeholder="juan.perez@example.com"
+            className="input focus-ring"
+            placeholder="correo@ejemplo.com"
             autoComplete="email"
+            aria-invalid={errors.email ? 'true' : 'false'}
+            aria-describedby={errors.email ? 'email-error' : undefined}
           />
           {errors.email && (
-            <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+            <p id="email-error" className="form-error" role="alert">
+              ⚠️ {errors.email.message}
+            </p>
           )}
         </div>
-
-        {/* Teléfono */}
-        <div>
-          <label htmlFor="telefono" className="block text-sm font-medium text-gray-700 mb-2">
-            Teléfono
+        <div className="form-group">
+          <label htmlFor="telefono" className="form-label">
+            Teléfono <span className="text-text-tertiary text-xs">(Opcional)</span>
           </label>
           <input
             {...register('telefono')}
             type="tel"
             id="telefono"
-            className="input"
+            className="input focus-ring"
             placeholder="+1 234 567 8900"
             autoComplete="tel"
+            aria-invalid={errors.telefono ? 'true' : 'false'}
+            aria-describedby={errors.telefono ? 'telefono-error' : undefined}
           />
           {errors.telefono && (
-            <p className="mt-1 text-sm text-red-600">{errors.telefono.message}</p>
+            <p id="telefono-error" className="form-error" role="alert">
+              ⚠️ {errors.telefono.message}
+            </p>
           )}
         </div>
       </div>
 
-      {/* Botones */}
-      <div className="flex justify-end space-x-4">
-        <button
-          type="button"
-          onClick={() => window.history.back()}
-          className="btn btn-secondary"
+      <div className="flex justify-end gap-4 pt-4 border-t border-border-muted">
+        <button 
+          type="button" 
+          onClick={() => window.history.back()} 
+          className="btn btn-secondary" 
           disabled={isLoading}
+          aria-label="Cancelar y volver"
         >
           Cancelar
         </button>
-        <button type="submit" className="btn btn-primary" disabled={isLoading}>
-          {isLoading ? 'Guardando...' : 'Guardar'}
+        <button 
+          type="submit" 
+          className="btn btn-primary" 
+          disabled={isLoading}
+          aria-label={isLoading ? 'Guardando...' : 'Guardar participante'}
+        >
+          {isLoading ? (
+            <>
+              <span className="spinner" aria-hidden="true"></span>
+              Guardando...
+            </>
+          ) : (
+            'Guardar'
+          )}
         </button>
       </div>
     </form>

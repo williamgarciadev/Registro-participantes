@@ -1,8 +1,9 @@
 """
 Punto de entrada principal de la aplicación FastAPI
 """
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from mangum import Mangum
 from aws_lambda_powertools import Logger, Tracer
 from aws_lambda_powertools.logging import correlation_paths
@@ -83,8 +84,28 @@ async def init_database():
         return {"status": "error", "message": str(e)}
 
 
+# Manejador de excepciones global
+@app.exception_handler(RuntimeError)
+async def runtime_error_handler(request: Request, exc: RuntimeError):
+    logger.error(f"RuntimeError: {str(exc)}")
+    return JSONResponse(
+        status_code=500,
+        content={"message": f"Server error: {str(exc)}"}
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    logger.error(f"Unexpected error: {str(exc)}", exc_info=True)
+    return JSONResponse(
+        status_code=500,
+        content={"message": f"Server error: {str(exc)}"}
+    )
+
+
 # Incluir routers de la API
 app.include_router(api_v1_router, prefix="/api/v1")
+
 
 # Handler para AWS Lambda
 handler = Mangum(app, lifespan="off")

@@ -5,6 +5,7 @@ import { toast } from 'react-toastify'
 import ParticipanteForm from '@/components/ParticipanteForm'
 import { participantesApi } from '@/services/participantes'
 import type { ParticipanteUpdate } from '@/types/participante'
+import { usePageHeader } from '@/components/PageHeaderContext'
 
 export default function EditarParticipantePage() {
   const { id } = useParams<{ id: string }>()
@@ -17,12 +18,27 @@ export default function EditarParticipantePage() {
     enabled: !!id,
   })
 
-  // Re-ejecutar query cuando el ID cambia
   useEffect(() => {
     if (id) {
       refetch()
     }
   }, [id, refetch])
+
+  const { setHeader, resetHeader } = usePageHeader()
+
+  useEffect(() => {
+    setHeader({
+      title: 'Editar participante',
+      subtitle: participante
+        ? `${participante.nombre} ${participante.apellido}`
+        : 'Actualiza la informacion del participante',
+      actions: null,
+    })
+
+    return () => {
+      resetHeader()
+    }
+  }, [participante, resetHeader, setHeader])
 
   const updateMutation = useMutation({
     mutationFn: (data: ParticipanteUpdate) => participantesApi.update(id!, data),
@@ -44,8 +60,8 @@ export default function EditarParticipantePage() {
   if (isLoading) {
     return (
       <div className="text-center py-12">
-        <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-primary-600"></div>
-        <p className="mt-2 text-gray-600">Cargando participante...</p>
+        <div className="inline-block h-8 w-8 animate-spin rounded-full border-b-2 border-primary-600" />
+        <p className="mt-2 text-secondary">Cargando participante...</p>
       </div>
     )
   }
@@ -53,18 +69,16 @@ export default function EditarParticipantePage() {
   if (!participante) {
     return (
       <div className="text-center py-12">
-        <p className="text-red-600">Participante no encontrado</p>
+        <p className="text-error">Participante no encontrado</p>
       </div>
     )
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="mx-auto max-w-3xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Editar Participante</h1>
-        <p className="text-gray-600 mt-1">
-          Actualiza la información del participante
-        </p>
+        <h1 className="heading-1">Editar participante</h1>
+        <p className="text-secondary mt-1">Actualiza la informacion del participante</p>
       </div>
 
       <div className="card">

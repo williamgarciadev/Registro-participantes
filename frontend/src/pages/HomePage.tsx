@@ -1,83 +1,131 @@
+import { useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { Users, Plus, Search } from 'lucide-react'
+import { Users, Plus, Search, ShieldCheck, Sparkles } from 'lucide-react'
+import { usePageHeader } from '@/components/PageHeaderContext'
 
 export default function HomePage() {
+  const { setHeader, resetHeader } = usePageHeader()
+
+  useEffect(() => {
+    setHeader({
+      title: 'Panel principal',
+      subtitle: 'Resumen general del sistema',
+      actions: (
+        <Link to="/participantes/nuevo" className="btn btn-primary hidden sm:inline-flex">
+          <Plus className="h-4 w-4" aria-hidden="true" />
+          Registrar participante
+        </Link>
+      ),
+    })
+
+    return () => {
+      resetHeader()
+    }
+  }, [resetHeader, setHeader])
+
   return (
-    <div className="space-y-8">
-      {/* Hero Section */}
-      <div className="text-center py-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Sistema de Registro de Participantes
-        </h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Gestiona y administra participantes de manera eficiente con nuestra plataforma
-          construida con tecnología serverless en AWS.
-        </p>
-      </div>
-
-      {/* Feature Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Link to="/participantes" className="card hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-center w-12 h-12 bg-primary-100 rounded-lg mb-4">
-            <Users className="h-6 w-6 text-primary-600" />
+    <div className="space-y-10 pb-16">
+      <section className="card animate-fade-in">
+        <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+          <div className="text-left md:max-w-3xl">
+            <h1 className="heading-1 bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">
+              Sistema de registro de participantes
+            </h1>
+            <p className="text-secondary mt-3 text-lg leading-relaxed">
+              Administra inscripciones, asistencia y gestiona la información clave de tus eventos desde un
+              panel centralizado, con una experiencia moderna basada en React y desplegada sobre infraestructura
+              serverless en AWS.
+            </p>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Ver Participantes
-          </h3>
-          <p className="text-gray-600">
-            Consulta la lista completa de participantes registrados en el sistema
-          </p>
-        </Link>
+          <Link to="/participantes" className="btn btn-secondary group">
+            <Users className="h-4 w-4 transition-transform group-hover:scale-110" aria-hidden="true" />
+            Ver participantes
+          </Link>
+        </div>
+      </section>
 
-        <Link to="/participantes/nuevo" className="card hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-center w-12 h-12 bg-green-100 rounded-lg mb-4">
-            <Plus className="h-6 w-6 text-green-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Nuevo Participante
-          </h3>
-          <p className="text-gray-600">
-            Registra un nuevo participante en el sistema de manera rápida
-          </p>
-        </Link>
-
-        <div className="card hover:shadow-lg transition-shadow">
-          <div className="flex items-center justify-center w-12 h-12 bg-blue-100 rounded-lg mb-4">
-            <Search className="h-6 w-6 text-blue-600" />
-          </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">
-            Buscar
-          </h3>
-          <p className="text-gray-600">
-            Encuentra participantes por nombre, apellido o correo electrónico
+      <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="stat-card animate-slide-up" style={{ animationDelay: '100ms' }}>
+          <span className="stat-card__icon stat-card__icon--primary">
+            <Users className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h3 className="mt-4 text-lg font-semibold text-text-primary">Gestión centralizada</h3>
+          <p className="mt-2 text-sm text-secondary">
+            Visualiza y controla el estado de cada participante con herramientas de filtrado y búsqueda avanzada.
           </p>
         </div>
-      </div>
+        <div className="stat-card animate-slide-up" style={{ animationDelay: '200ms' }}>
+          <span className="stat-card__icon stat-card__icon--success">
+            <Sparkles className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h3 className="mt-4 text-lg font-semibold text-text-primary">Flujos optimizados</h3>
+          <p className="mt-2 text-sm text-secondary">
+            Formularios claros y procesos asistidos para registrar, editar o reactivar participantes en segundos.
+          </p>
+        </div>
+        <div className="stat-card animate-slide-up" style={{ animationDelay: '300ms' }}>
+          <span className="stat-card__icon stat-card__icon--warning">
+            <Search className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h3 className="mt-4 text-lg font-semibold text-text-primary">Búsqueda inteligente</h3>
+          <p className="mt-2 text-sm text-secondary">
+            Encuentra participantes por nombre, correo o estado y navega resultados con paginación fluida.
+          </p>
+        </div>
+        <div className="stat-card animate-slide-up" style={{ animationDelay: '400ms' }}>
+          <span className="stat-card__icon stat-card__icon--primary">
+            <ShieldCheck className="h-5 w-5" aria-hidden="true" />
+          </span>
+          <h3 className="mt-4 text-lg font-semibold text-text-primary">Arquitectura segura</h3>
+          <p className="mt-2 text-sm text-secondary">
+            Construido sobre AWS Lambda, API Gateway y Aurora Serverless para escalar bajo demanda con seguridad.
+          </p>
+        </div>
+      </section>
 
-      {/* Tech Stack Info */}
-      <div className="card bg-gradient-to-r from-primary-50 to-blue-50">
-        <h2 className="text-2xl font-bold text-gray-900 mb-4">Stack Tecnológico</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Backend</h3>
-            <ul className="space-y-1 text-gray-700">
-              <li>• Python + FastAPI</li>
-              <li>• AWS Lambda</li>
-              <li>• Aurora Serverless v2 (PostgreSQL)</li>
-              <li>• API Gateway</li>
+      <section className="card animate-scale-in" style={{ animationDelay: '500ms' }}>
+        <h2 className="heading-2">Stack tecnológico</h2>
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
+          <div className="p-6 rounded-lg bg-gradient-to-br from-primary-50 to-neutral-50 border border-primary-100">
+            <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
+              <span className="text-primary-600">⚙️</span> Backend
+            </h3>
+            <ul className="mt-3 space-y-2 text-sm text-secondary">
+              <li className="flex items-center gap-2">
+                <span className="text-primary-500">✓</span> Python + FastAPI
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-primary-500">✓</span> AWS Lambda y API Gateway
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-primary-500">✓</span> Aurora Serverless v2 (PostgreSQL)
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-primary-500">✓</span> Infraestructura como código con SAM
+              </li>
             </ul>
           </div>
-          <div>
-            <h3 className="font-semibold text-gray-900 mb-2">Frontend</h3>
-            <ul className="space-y-1 text-gray-700">
-              <li>• React 18 + TypeScript</li>
-              <li>• Vite</li>
-              <li>• S3 + CloudFront</li>
-              <li>• TailwindCSS</li>
+          <div className="p-6 rounded-lg bg-gradient-to-br from-success-50 to-neutral-50 border border-success-100">
+            <h3 className="text-base font-semibold text-text-primary flex items-center gap-2">
+              <span className="text-success-600">🎨</span> Frontend
+            </h3>
+            <ul className="mt-3 space-y-2 text-sm text-secondary">
+              <li className="flex items-center gap-2">
+                <span className="text-success-500">✓</span> React 18 + TypeScript
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-success-500">✓</span> Vite y React Query
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-success-500">✓</span> TailwindCSS y sistema de tokens de diseño
+              </li>
+              <li className="flex items-center gap-2">
+                <span className="text-success-500">✓</span> Despliegue en S3 + CloudFront
+              </li>
             </ul>
           </div>
         </div>
-      </div>
+      </section>
     </div>
   )
 }
