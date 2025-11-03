@@ -1,6 +1,6 @@
-import { ReactNode, useState, useEffect, useMemo, useCallback, FormEvent } from 'react'
+import { ReactNode, useState, useEffect, useMemo, useCallback, FormEvent, useRef } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Users, Home, Menu, Search, Bell, UserCircle, LogOut } from 'lucide-react'
+import { Users, Home, Menu, Search, Bell, UserCircle, ChevronDown } from 'lucide-react'
 import PageHeaderContext, { PageHeaderState } from './PageHeaderContext'
 import { useAuth } from './AuthProvider'
 
@@ -37,6 +37,8 @@ export default function Layout({ children }: LayoutProps) {
   const location = useLocation()
   const navigate = useNavigate()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement | null>(null)
   const { user, logout } = useAuth()
 
   const defaultHeader: PageHeaderState = useMemo(() => {
@@ -60,6 +62,7 @@ export default function Layout({ children }: LayoutProps) {
 
   useEffect(() => {
     setIsSidebarOpen(false)
+    setIsUserMenuOpen(false)
   }, [location.pathname])
 
   useEffect(() => {
@@ -86,6 +89,25 @@ export default function Layout({ children }: LayoutProps) {
     logout()
     navigate('/login', { replace: true })
   }
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!userMenuRef.current) {
+        return
+      }
+      if (!userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+    if (isUserMenuOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    } else {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [isUserMenuOpen])
 
   const content = children ?? <Outlet />
   const displayName = user?.full_name?.trim() ? user.full_name : user?.email ?? 'Usuario'
@@ -171,26 +193,36 @@ export default function Layout({ children }: LayoutProps) {
 
               <div className="dashboard-topbar__actions">
                 {header.actions}
-                <button type="button" className="dashboard-topbar__toggle" aria-label="Ver notificaciones">
+                <button type="button" className="dashboard-topbar__icon-btn" aria-label="Ver notificaciones">
                   <Bell className="h-5 w-5" aria-hidden="true" />
+                  <span className="dashboard-topbar__icon-indicator" aria-hidden="true" />
                 </button>
-                <div className="dashboard-user" role="group" aria-label="Informacion de usuario">
-                  <span className="dashboard-user__avatar" aria-hidden="true">
-                    <UserCircle className="h-5 w-5" />
-                  </span>
-                  <div className="dashboard-user__meta">
-                    <span className="dashboard-user__name">{displayName}</span>
-                    <span className="dashboard-user__role">{roleLabel}</span>
-                  </div>
+                <div ref={userMenuRef} className="dashboard-user-menu-container">
+                  <button
+                    type="button"
+                    className="dashboard-user__button"
+                    onClick={() => setIsUserMenuOpen((open) => !open)}
+                    aria-haspopup="menu"
+                    aria-expanded={isUserMenuOpen}
+                    aria-label="Opciones de usuario"
+                  >
+                    <span className="dashboard-user__avatar" aria-hidden="true">
+                      <UserCircle className="h-5 w-5" />
+                    </span>
+                    <div className="dashboard-user__meta">
+                      <span className="dashboard-user__name">{displayName}</span>
+                      <span className="dashboard-user__role">{roleLabel}</span>
+                    </div>
+                    <ChevronDown className="h-4 w-4 shrink-0 text-neutral-500" aria-hidden="true" />
+                  </button>
+                  {isUserMenuOpen && (
+                    <div className="dashboard-user-menu" role="menu">
+                      <button type="button" className="dashboard-user-menu__item" onClick={handleLogout} role="menuitem">
+                        Cerrar sesion
+                      </button>
+                    </div>
+                  )}
                 </div>
-                <button
-                  type="button"
-                  className="dashboard-topbar__toggle"
-                  onClick={handleLogout}
-                  aria-label="Cerrar sesion"
-                >
-                  <LogOut className="h-5 w-5" aria-hidden="true" />
-                </button>
               </div>
             </div>
           </header>
