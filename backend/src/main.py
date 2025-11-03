@@ -1,7 +1,7 @@
 """
 Punto de entrada principal de la aplicación FastAPI
 """
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from mangum import Mangum
@@ -37,6 +37,18 @@ app.add_middleware(
     expose_headers=["*"],
 )
 
+
+@app.middleware("http")
+async def add_security_headers(request: Request, call_next):
+    """Middleware para adjuntar cabeceras de seguridad basicas en cada respuesta."""
+    response: Response = await call_next(request)
+    response.headers.setdefault("X-Frame-Options", "DENY")
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    response.headers.setdefault("Permissions-Policy", "geolocation=(), microphone=()")
+    # HSTS solo tiene efecto en HTTPS, pero no afecta entornos locales HTTP
+    response.headers.setdefault("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+    return response
 
 @app.on_event("startup")
 async def startup_event():
