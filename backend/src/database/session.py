@@ -81,6 +81,66 @@ async def create_tables():
         # Crear extensión UUID
         await conn.execute(text('CREATE EXTENSION IF NOT EXISTS "uuid-ossp"'))
 
+        # Crear tablas de seguridad (usuarios, roles y permisos)
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS permissions (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                code VARCHAR(100) UNIQUE NOT NULL,
+                name VARCHAR(100) NOT NULL,
+                description VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+            )
+        """))
+
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS roles (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                name VARCHAR(50) UNIQUE NOT NULL,
+                description VARCHAR(255),
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+            )
+        """))
+
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS users (
+                id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                email VARCHAR(255) UNIQUE NOT NULL,
+                hashed_password VARCHAR(255) NOT NULL,
+                full_name VARCHAR(150),
+                is_active BOOLEAN DEFAULT TRUE NOT NULL,
+                is_superuser BOOLEAN DEFAULT FALSE NOT NULL,
+                last_login_at TIMESTAMP NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+            )
+        """))
+
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS role_permissions (
+                role_id UUID REFERENCES roles(id) ON DELETE CASCADE,
+                permission_id UUID REFERENCES permissions(id) ON DELETE CASCADE,
+                granted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                PRIMARY KEY (role_id, permission_id)
+            )
+        """))
+
+        await conn.execute(text("""
+            CREATE TABLE IF NOT EXISTS user_roles (
+                user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                role_id UUID REFERENCES roles(id) ON DELETE CASCADE,
+                assigned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
+                PRIMARY KEY (user_id, role_id)
+            )
+        """))
+
+        # Indices para tablas de seguridad
+        await conn.execute(text('CREATE INDEX IF NOT EXISTS idx_roles_name ON roles(name)'))
+        await conn.execute(text('CREATE INDEX IF NOT EXISTS idx_permissions_code ON permissions(code)'))
+        await conn.execute(text('CREATE INDEX IF NOT EXISTS idx_role_permissions_role ON role_permissions(role_id)'))
+        await conn.execute(text('CREATE INDEX IF NOT EXISTS idx_user_roles_user ON user_roles(user_id)'))
+
         # Crear tabla participantes
         await conn.execute(text("""
             CREATE TABLE IF NOT EXISTS participantes (

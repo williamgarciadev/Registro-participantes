@@ -32,6 +32,11 @@ class Settings(BaseSettings):
     # Logging
     LOG_LEVEL: str = "INFO"
 
+    # Seguridad y autenticación
+    JWT_SECRET_KEY: str = "change-me"  # Reemplazar en entorno productivo mediante variable de entorno
+    JWT_ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+
     class Config:
         case_sensitive = True
         env_file = ".env"
