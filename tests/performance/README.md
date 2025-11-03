@@ -58,6 +58,40 @@ BASE_URL="http://localhost:8000" VUS=20 DURATION="3m" k6 run tests/performance/k
 BASE_URL="http://localhost:8000" VUS=5 DURATION="1m" CLEANUP="true" k6 run tests/performance/k6/participantes.js
 ```
 
+**Con K6 en Docker (sin instalar K6):**
+```powershell
+# Windows PowerShell - Test para ver notificaciones en tiempo real
+$scriptPath = (Resolve-Path tests\performance\k6).ProviderPath
+
+docker run --rm `
+  --network registro-participantes_app-network `
+  -e BASE_URL=http://backend-lb `
+  -e VUS=3 `
+  -e DURATION=30s `
+  -v "${scriptPath}:/scripts" `
+  grafana/k6 run /scripts/participantes.js
+
+# Test de carga más intenso
+docker run --rm `
+  --network registro-participantes_app-network `
+  -e BASE_URL=http://backend-lb `
+  -e VUS=100 `
+  -e DURATION=1m `
+  -v "${scriptPath}:/scripts" `
+  grafana/k6 run /scripts/participantes.js
+```
+
+```bash
+# Linux/Mac - Test básico
+docker run --rm \
+  --network registro-participantes_app-network \
+  -e BASE_URL=http://backend-lb \
+  -e VUS=3 \
+  -e DURATION=30s \
+  -v "$(pwd)/tests/performance/k6:/scripts" \
+  grafana/k6 run /scripts/participantes.js
+```
+
 ## 🎯 Cómo Funciona el Test
 
 ### Flujo del Test
@@ -183,3 +217,13 @@ docker-compose -f docker-compose.dev.yml restart backend
 - [ ] Probar diferentes tipos de notificaciones (info, warning, error)
 - [ ] Medir latencia entre creación de participante y aparición de notificación
 - [ ] Test de stress: ¿cuántas notificaciones puede manejar el sistema?
+
+PS D:\Proyectos\ClaudeCode\Registro-participantes> $scriptPath = (Resolve-Path tests\performance\k6).ProviderPath
+
+docker run --rm `
+>>   --network registro-participantes_app-network `
+>>   -e BASE_URL=http://backend-lb `
+>>   -e VUS=100 `
+>>   -e DURATION=1m `
+>>   -v "${scriptPath}:/scripts" `
+>>   grafana/k6 run /scripts/participantes.js

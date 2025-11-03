@@ -70,7 +70,7 @@ export default function Layout({ children }: LayoutProps) {
   const navItems = useMemo(
     () =>
       baseNavItems.filter((item) => !item.requiredPermission || hasPermission(item.requiredPermission)),
-    [hasPermission]
+    [hasPermission, user]
   )
 
   const defaultHeader: PageHeaderState = useMemo(() => {
@@ -88,7 +88,7 @@ export default function Layout({ children }: LayoutProps) {
       subtitle: 'Administracion del sistema',
       actions: null,
     }
-  }, [location.pathname])
+  }, [location.pathname, navItems])
 
   const [header, setHeaderState] = useState<PageHeaderState>(defaultHeader)
 
