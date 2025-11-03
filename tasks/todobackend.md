@@ -4,3 +4,9 @@
 - [x] Backend - Endpoints y proteccion: exponer rutas de autenticacion (`/auth/login`, `/auth/profile`), sembrar o documentar un usuario admin base, aplicar dependencias de autorizacion segun rol sobre los endpoints de participantes.
 - [x] Frontend - Flujo de login: anadir pagina de acceso, estado global de sesion con almacenamiento seguro del token, guardas de ruta y visibilidad condicionada segun rol, incluyendo mensajes de error y manejo de expiracion.
 - [ ] Cierre - Verificacion y entrega: pruebas manuales basicas (login, acceso permitido/denegado), checklist de seguridad, seccion de revision, y commits/push por tarea completada siguiendo las buenas practicas.
+
+## Revision
+
+- Nuevo flujo de autenticacion en React con pagina dedicada, manejo de token y cierres de sesion ante respuestas 401.
+- Layout, panel de participantes y paginas de alta/edicion condicionan botones y acciones segun los permisos `participantes:view` y `participantes:manage`.
+- Estilos base ampliados con componentes `auth-*` para la pantalla de acceso y estado de carga protegido.
