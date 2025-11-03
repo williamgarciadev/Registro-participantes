@@ -1,10 +1,11 @@
 import { ReactNode, useState, useEffect, useMemo, useCallback, FormEvent } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { Users, Home, Menu, Search, Bell, UserCircle } from 'lucide-react'
+import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { Users, Home, Menu, Search, Bell, UserCircle, LogOut } from 'lucide-react'
 import PageHeaderContext, { PageHeaderState } from './PageHeaderContext'
+import { useAuth } from './AuthProvider'
 
 interface LayoutProps {
-  children: ReactNode
+  children?: ReactNode
 }
 
 interface NavItem {
