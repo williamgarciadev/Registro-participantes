@@ -41,6 +41,8 @@ class Settings(BaseSettings):
     JWT_SECRET_KEY: str = "change-me"  # Reemplazar en entorno productivo mediante variable de entorno
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 60
+    LOGIN_RATE_LIMIT: int = 5
+    LOGIN_RATE_WINDOW_SECONDS: int = 60
 
     class Config:
         case_sensitive = True

@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from aws_lambda_powertools import Logger
@@ -12,6 +12,7 @@ from src.database.session import get_db
 from src.models.user import User
 from src.schemas.auth.token import AuthenticatedUser, LoginRequest, TokenResponse
 from src.services.user_service import UserService
+from src.services.rate_limiter import login_rate_limiter
 
 router = APIRouter()
 logger = Logger()
@@ -126,9 +127,12 @@ async def ensure_admin_role(db: AsyncSession) -> None:
     summary="Iniciar sesión y obtener token de acceso",
 )
 async def login_credentials(
+    request: Request,
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: AsyncSession = Depends(get_db),
 ):
+    client_key = request.headers.get("X-Forwarded-For", request.client.host if request.client else "anonymous")
+    await login_rate_limiter.check(f"login_form:{client_key}")
     await ensure_admin_role(db)
 
     user = await authenticate_user(db, form_data.username, form_data.password)
@@ -160,7 +164,12 @@ async def login_credentials(
     response_model=TokenResponse,
     summary="Iniciar sesión con payload JSON",
 )
-async def login_json(credentials: LoginRequest, db: AsyncSession = Depends(get_db)):
+async def login_json(credentials: LoginRequest, request: Request, db: AsyncSession = Depends(get_db)):
+    # Limitar intentos por IP
+    # Usamos los encabezados X-Forwarded-For en caso de que esté detrás de un proxy
+    client_host = request.headers.get("X-Forwarded-For", request.client.host if request.client else "anonymous")
+    client_key = f"{client_host}:{credentials.email.lower()}"
+    await login_rate_limiter.check(f"login_json:{client_key}")
     await ensure_admin_role(db)
 
     user = await authenticate_user(db, credentials.email, credentials.password)
